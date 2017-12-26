@@ -1,0 +1,17 @@
+.table-user-information > tbody > tr {
+    border-top: 1px solid rgb(221, 221, 221);
+}
+
+.table-user-information > tbody > tr:first-child {
+    border-top: 0;
+}
+
+.table-user-information > tbody > tr > td {
+    border-top: 0;
+}
+
+.controls input[readonly="readonly"]{
+    border: 0;
+    box-shadow: none ! important;
+    background-color: white ! important;
+}

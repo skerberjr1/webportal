@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+  {% block content %}
+
+  <head>
+    <script>
+      $(document).ready(function(){
+        $("#back").click(function () {
+          parent.history.back();
+          return false;
+        });
+      });
+    </script>
+  </head>
+
+  <body>
+    <div class="page-header">
+      <h1>Search Results</h1>
+    </div>
+    <h4>No results found. Try using different filters.</h4>
+    <a id="back" href="/orders/order_search/">Back to Order Search</a><p></p>
+  </body>
+  {% endblock %}
+</html>

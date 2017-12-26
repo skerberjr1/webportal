@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html lang="en"
+  {% block navbar_class-packer_overview %}active{% endblock %}
+  
+  {% block content %}
+  <head>
+    <link href="{% static 'orders/css/datepicker.css' %}" rel="stylesheet">
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/js/bootstrap-datepicker.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-idletimer/1.0.0/idle-timer.min.js"></script>
+  </head>
+
+  <body>
+    <div class="page-header">
+      <h1>Shipments by Packer</h1>
+    </div>
+
+    <div class="row">
+      <div class="col-md-12">
+        <div class="alert alert-info" role="alert">
+          <b>Note:</b> Timestamp for packs is based on Kiosk completion time.
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div class="row">
+              <div class="col-sm-6 col-lg-3">
+                <label for="begin_date">Begin Date</label>
+                <input class="dateinput dateinput-lg form-control" id="begin_date"  type="text">
+              </div>
+              <div class="col-sm-6 col-lg-3">
+                <label for="end_date">End Date</label>
+                <input class="dateinput dateinput-lg form-control" id="end_date"  type="text">
+              </div>
+            </div>
+            <div class="row" style="padding-bottom: 20px">
+              <div class="col-sm-4 col-lg-3">
+                <label for="interval">Interval</label>
+                <select class="form-control" id="interval">
+                  <option value="hour">Hour</option>
+                  <option value="day">Day</option>
+                  <option value="week">Week</option>
+                </select>
+              </div>
+              <div class="col-sm-4 col-lg-3">
+                <label for="order_type">Order Type</label>
+                <select class="form-control" id="order_type">
+                  <option value="ST">Standard</option>
+                  <option value="TR">Transfer</option>
+                  <option value="all">All</option>
+                </select>
+              </div>
+              <div class="col-sm-4 col-lg-3">
+                <label for="shipment_pack">Show packs or shipments</label>
+                <select class="form-control" id="shipment_pack">
+                  <option value="pack">Packs</option>
+                  <option value="shipment">Shipments</option>
+                </select>
+              </div>
+              {% if request.user.is_staff %}
+              <div class="col-sm-4 col-lg-3 pull-right" style="padding-top: 30px; padding-bottom: 20px;">
+                <button class="btn btn-default pull-right" id="all_packers">Select All Packers</button>
+              </div>
+              {% endif %}
+            </div>
+
+            <div class="col-sm-12">
+              <div id="packer_chart"></div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </body>
+
+  <script type="text/javascript">
+    var selectedPacker = 'all';
+    var endDate = new Date();
+    var beginDate = new Date();
+
+    {% if request.GET.packer %}
+      selectedPacker = '{{ request.user.last_name }}'.replace(/ /g, '_').replace('.', '') + '-' + '{{ request.user.first_name }}'.replace(/ /g, '_').replace('.', '');
+      beginDate.setDate(beginDate.getDate() - 7);
+    {% endif %}
+
+    $(document).ready(function() {
+      $('.dateinput').datepicker({
+        endDate: '0d',
+        daysOfWeekDisabled: '6'
+      });
+      $('#end_date').datepicker('update', endDate.toLocaleDateString());
+      $('#begin_date').datepicker('update', beginDate.toLocaleDateString());
+
+      function loadChart() {
+        var packer = selectedPacker;
+
+        $('#packer_chart').load(
+            '/orders/packer_overview/chart?begin_date=' + 
+            $('#begin_date').val().replace('/', '.').replace('/', '.') +
+            '&end_date=' +
+            $('#end_date').val().replace('/', '.').replace('/', '.') +
+            '&interval=' +
+            $('#interval').val() +
+            '&order_type=' +
+            $('#order_type').val() +
+            '&packer=' + packer +
+            '&shipment_pack=' +
+            $('#shipment_pack').val()
+          );
+      };
+
+      loadChart();
+
+      $('.dateinput').datepicker().on('changeDate', function() {loadChart()});
+      $('.form-control').change(function() {loadChart()});
+
+      $('#all_packers').click(function() {
+        selectedPacker = 'all';
+        loadChart();
+      });
+
+      {% if request.user.is_staff %}
+      {% else %}
+        $(document).idleTimer(120000);
+        $(document).on('idle.idleTimer', function(event) {
+          window.location = 'http://10.0.0.28:8080/packer_logout';
+        });
+      {% endif %}
+
+      $(window).resize(function() {
+          if(this.resizeTO) clearTimeout(this.resizeTO);
+          this.resizeTO = setTimeout(function() {
+            $(this).trigger('resizeEnd');
+          }, 500);
+        });
+
+        $(window).on('resizeEnd', function() {loadChart()});
+      
+    });
+  </script>
+
+  {% endblock %}
+</html>

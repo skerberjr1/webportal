@@ -1,0 +1,101 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<html>
+  <head>
+    <link href="{% static 'orders/css/datepicker.css' %}" rel="stylesheet">
+    <!--Load the AJAX API-->
+    <script type="text/javascript">
+
+      // Load the Visualization API and the corechart package.
+      google.charts.load('visualization', {'packages':['corechart']});
+
+      // Set a callback to run when the Google Visualization API is loaded.
+      google.charts.setOnLoadCallback(drawFbaChart);
+
+      var fbaData;
+      var fbaChart;
+
+      function drawFbaChart() {
+
+        fbaData = new google.visualization.DataTable();
+        var total_orders = 0;
+
+        fbaData.addColumn('string', '');
+        fbaData.addColumn('number', 'Count');
+        fbaData.addColumn('number', 'Total Weight');
+
+        {% for row in fba_orders %}
+          fbaData.addRows([
+              ['{{ row.Date }}', {{ row.Cnt }}, {{ row.TotalWeight }}]
+            ]);
+        {% endfor %}
+
+        var options = {
+          chart: {
+            title: 'FBA Orders',
+            height: '100%',
+          },
+          backgroundColor: 'transparent',
+          chartArea: {
+            backgroundColor: 'transparent'
+          },
+          seriesType: 'bars',
+          series: {
+            1: {
+              type: 'line',
+              targetAxisIndex:1
+            }
+          },
+          hAxis: {
+            title: null,
+          },
+          vAxes: {
+            0: {
+              title: 'Count',
+              baseline: 0,
+            },
+            1: {
+              title: 'Weight (lbs.)',
+              baseline: 0,
+            }
+          }
+        };
+
+        fbaChart = new google.visualization.ComboChart(document.getElementById('fba_chart_div'));
+        fbaChart.draw(fbaData, options);
+
+        google.visualization.events.addListener(fbaChart, 'select', selectCol);
+      };
+
+      function selectCol(){
+        var selection = fbaChart.getSelection();
+
+        if (typeof selection[0] == "undefined" || selection[0].row == null) {
+          fbaChart.setSelection();
+          return;
+        }
+
+        var date = fbaData.getValue(selection[0].row, 0);
+        var url = "/orders/fba_orders/charts/table/";
+        url += $("#interval").val() + '/';
+        url += date.replace('/', '.').replace('/', '.');
+
+
+        $("#fba_table_placeholder").load(url);
+
+      }
+
+    </script>
+
+  </head>
+
+  <body>
+    <div class="container-fluid">
+      <div id="fba_chart_div" style="height: 400px;"></div>
+    </div>
+    
+  </body>
+</html>

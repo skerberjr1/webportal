@@ -1,0 +1,90 @@
+.row-eq-height {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display:         flex;
+}
+
+.filterable {
+    margin-top: 15px;
+}
+.filterable .panel-heading .pull-right {
+    margin-top: -20px;
+}
+.filterable .filters input[disabled] {
+    background-color: transparent;
+    border: none;
+    cursor: auto;
+    box-shadow: none;
+    padding: 0;
+    height: auto;
+}
+.filterable .filters input[disabled]::-webkit-input-placeholder {
+    color: #333;
+}
+.filterable .filters input[disabled]::-moz-placeholder {
+    color: #333;
+}
+.filterable .filters input[disabled]:-ms-input-placeholder {
+    color: #333;
+}
+.filterable th {
+  padding-right: 20px ! important;
+}
+.dateinput-lg {
+    font-size: 16px;
+    height: 40px;
+}
+
+.panel-heading-padfix {
+  font-size: 18px;
+  padding-top: 15px;
+  padding-bottom: 15px;
+}
+
+.panel-heading-input {
+  font-size: 14px;
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+
+.heading-label {
+  font-size: 12px;
+}
+
+.overview-chart {
+  height: 400px;
+}
+
+.overview-chart-expanded {
+  height: 500px;
+}
+
+svg > g > g:last-child { pointer-events: none }
+
+div {
+    -webkit-transition: width 0.3s ease, height 0.3s ease, margin 0.3s ease;
+    -moz-transition: width 0.3s ease, height 0.3s ease, margin 0.3s ease;
+    -o-transition: width 0.3s ease, height 0.3s ease, margin 0.3s ease;
+    transition: width 0.3s ease, height 0.3s ease, margin 0.3s ease;
+}
+
+.span-0 {
+    width: 0;
+    height: 0;
+}
+
+.span-0 *{
+  width: 0;
+  height: 0;
+  padding: 0;
+}
+
+.asteriskField {
+    display: none;
+}
+
+.panel-heading small {
+  color: #777777;
+  font-size: 14px;
+}

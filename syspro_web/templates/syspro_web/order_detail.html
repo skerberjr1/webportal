@@ -1,0 +1,269 @@
+{% extends "syspro_web/base.html" %}
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html lang="en">
+{% block content %}
+<body>
+  <div class="row">
+    <div class="col-lg-12">
+      <h1 class="page-header">Sales Order <strong>{{ object.salesorder|floatformat }}</strong></h1>
+      {% if object.customerponumber %}
+      <h3>Customer PO <strong>{{ object.customerponumber }}</strong></h3>
+      {% endif %}
+      <h3>
+        Status <strong>{{ object.get_orderstatus_display }}</strong>
+        <span class="pull-right">Order Date <strong>{{ object.orderdate|date:"DATE_FORMAT" }}</strong></span>
+      </h3>
+    </div>
+  </div>
+
+  <div class="row">
+
+    <!-- Customer Info Panel -->
+    <div class="col-lg-7">
+      <div class="panel panel-default" >
+        <div class="panel-heading">
+          <span class="glyphicon glyphicon-user" aria-hidden="true"></span> Customer Info
+        </div>
+
+        <div class="panel-body">
+          <div class="list-group">
+            <li class="list-group-item">
+              <strong>Customer Name</strong>
+              <span class="pull-right"><a href="/syspro_web/customer/{{ customer.customer }}">{{ customer.name }}</a></span>
+            </li>
+            <li class="list-group-item">
+              <strong>Telephone Number</strong>
+              <span class="pull-right">{{ customer.telephone }}</span>
+            </li>
+            <li class="list-group-item">
+              <strong>Email</strong>
+              <span class="pull-right">{{ customer.email|urlize }}</span>
+            </li>
+            <li class="list-group-item {% if customer_plus.customeralert|length > 1 %}list-group-item-warning{% endif %}">
+              <strong>Customer Alert</strong>
+              <span class="pull-right">{{ customer.customeralert }}</span>
+            </li>
+          </div>
+
+          <div class="row">
+            <div class="col-lg-6">
+              <div class="panel panel-default">
+                <div class="panel-heading">Billing Address 
+                  <span class="pull-right">
+                    <a href="https://www.google.com/maps/search/{{ customer.soldtoaddr3.split|join:'+' }}+{{ customer.soldtoaddr4.split|join:'+' }}+{{ customer.soldtoaddr5.split|join:'+' }}" target="_blank" class="btn btn-default">
+                      <span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span>
+                    </a>
+                  </span>
+                </div>
+                <ul class="list-group">
+                  <li class="list-group-item">
+                    <strong>Name</strong>
+                    <span class="pull-right">{{ customer.soldtoaddr1 }}</span>
+                  </li>
+                  {% if customer.soldtoaddr2|length > 1 %}
+                  <li class="list-group-item">
+                    <strong>Name 2</strong>
+                    <span class="pull-right">{{ customer.soldtoaddr2 }}</span>
+                  </li>
+                  {% endif %}
+                  <li class="list-group-item">
+                    <strong>Address</strong>
+                    <span class="pull-right">{{ customer.soldtoaddr3 }}</span>
+                  </li>
+                  {% if customer.soldtoaddr4|length > 1 %}
+                  <li class="list-group-item">
+                    <strong>Address 2</strong>
+                    <span class="pull-right">{{ customer.soldtoaddr4 }}</span>
+                  </li>
+                  {% endif %}
+                  <li class="list-group-item">
+                    <strong>City, State</strong>
+                    <span class="pull-right">{{ customer.soldtoaddr5 }}</span>
+                  </li>
+                  <li class="list-group-item">
+                    <strong>Zip</strong>
+                    <span class="pull-right">{{ customer.soldpostalcode }}</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="col-lg-6">
+              <div class="panel panel-default">
+                <div class="panel-heading">Shipping Address
+                  <span class="pull-right">
+                    <a href="https://www.google.com/maps/search/{{ customer.shiptoaddr3.split|join:'+' }}+{{ customer.shiptoaddr4.split|join:'+' }}+{{ customer.shiptoaddr5.split|join:'+' }}" target="_blank" class="btn btn-default">
+                      <span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span>
+                    </a>
+                  </span>
+                </div>
+                <ul class="list-group">
+                  <li class="list-group-item">
+                    <strong>Name</strong>
+                    <span class="pull-right">{{ customer.shiptoaddr1 }}</span>
+                  </li>
+                  {% if customer.shiptoaddr2|length > 1 %}
+                  <li class="list-group-item">
+                    <strong>Name 2</strong>
+                    <span class="pull-right">{{ customer.shiptoaddr2 }}</span>
+                  </li>
+                  {% endif %}
+                  <li class="list-group-item">
+                    <strong>Address</strong>
+                    <span class="pull-right">{{ customer.shiptoaddr3 }}</span>
+                  </li>
+                  {% if customer.shiptoaddr4|length > 1 %}
+                  <li class="list-group-item">
+                    <strong>Address 2</strong>
+                    <span class="pull-right">{{ customer.shiptoaddr4 }}</span>
+                  </li>
+                  {% endif %}
+                  <li class="list-group-item">
+                    <strong>City, State</strong>
+                    <span class="pull-right">{{ customer.shiptoaddr5 }}</span>
+                  </li>
+                  <li class="list-group-item">
+                    <strong>Zip</strong>
+                    <span class="pull-right">{{ customer.shippostalcode }}</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- /Customer Info Panel -->
+
+    <!-- Order Info Panel -->
+    <div class="col-lg-5">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span> Order Info
+        </div>
+        <div class="panel-body">
+          <ul class="list-group">
+            {% if object.orderstatus == 'S' %}
+            <li class="list-group-item list-group-item-warning">
+              <strong>Suspense Reason</strong>
+              <span class="pull-right">{{ order_plus.first.suspensereason }}</span>
+            </li>              
+            {% endif %}
+            <li class="list-group-item">
+              <strong>Order Capture Time</strong>
+              <span class="pull-right">{{ object.order_time }}</span>
+            </li>
+            <li class="list-group-item">
+              <strong>Salesperson</strong>
+              <span class="pull-right">{{ object.salesperson }}</span>
+            </li>
+            <li class="list-group-item">
+              <strong>Last Operator</strong>
+              <span class="pull-right">{{ object.lastoperator }}</span>
+            </li>
+            <li class="list-group-item">
+              <strong>Shipping Method</strong>
+              <span class="pull-right">{{ object.shippinginstrs }}</span>
+            </li>
+          </ul>
+          {% if shipment_packs %}
+          <ul class="list-group">
+            <li class="list-group-item">
+              <strong>Tracking Number</strong>
+              <span class="pull-right">
+                {% with shipment_packs|first as first_pack %}
+                <a href="https://northshorecare.wismolabs.com/northshorecare/tracking?TRK={{ first_pack.label1tracking }}&CAR={{ object.shippinginstrs }}&ON={% if object.salesperson == 'PH' %}PH{{object.salesorder}}{% else %}{{object.customerponumber}}{% endif %}&name={{ customer.name }}{% if object.ordertype == 'UF' or 'A' in object.customerponumber %}&autoShip=true{% else %}&autoShip=false{% endif %}" target="_blank">
+                  {{ first_pack.label1tracking }}
+                </a>
+                <!-- <a href="https://northshorecare.wismolabs.com/northshorecare/tracking?TRK={{ first_pack.label1tracking }}&CAR={{ object.shippinginstrs }}&ON={{ object.customerponumber }}&name={{ customer.name }}{% if object.ordertype == 'UF' or 'A' in object.customerponumber %}&autoShip=true{% else %}&autoShip=false{% endif %}" target="_blank">
+                  {{ first_pack.label1tracking }}
+                </a>   -->              
+                {% endwith %}
+              </span>
+            </li>
+            <li class="list-group-item">
+              <strong>Number of Packs</strong>
+              <span class="pull-right">{{ shipment_packs|length }}</span>
+            </li>
+          </ul>
+          {% endif %}
+          <ul class="list-group">
+            <li class="list-group-item">
+              <strong>Subtotal</strong>
+              <span class="pull-right">${{ object.subtotal|floatformat:2 }}</span>
+            </li>
+            <li class="list-group-item">
+              <strong>Freight Total</strong>
+              <span class="pull-right">${{ object.freight_total|floatformat:2 }}</span>
+            </li>
+            <li class="list-group-item">
+              <strong>Sales Tax</strong>
+              <span class="pull-right">${{ object.sales_tax|floatformat:2 }}</span>
+            </li>
+            <li class="list-group-item">
+              <strong>Total</strong>
+              <span class="pull-right">${{ object.total|floatformat:2 }}</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <!-- /Order Info Panel -->
+
+    {# Order Totals #}
+  </div>
+
+  <!-- Line Details -->
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <span class="glyphicon glyphicon-shopping-cart" aria-hidden="true"></span> Line Items
+        </div>
+        <div class="panel-body">
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Line</th>
+                  <th>Stock Code</th>
+                  <th>Description</th>
+                  <th>Price</th>
+                  <th>Order Quantity</th>
+                  <th>Ship Quantity</th>
+                  <th>Ship Date</th>
+                  <th>Backorder Quantity</th>
+                  <th>Extended Price</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for line in detail_lines %}
+                <tr>
+                  <td>{{ line.salesorderline }}</td>
+                  <td><a href="http://www.northshorecare.com/productshortcut/{{line.mstockcode.stockcode }}" target="_blank">
+                    {{ line.mstockcode.stockcode }}
+                  </a></td> {# <a> to website item page #}
+                  <td>{{ line.mstockcode.full_description }}</td>
+                  <td>{{ line.mprice|floatformat:2 }}</td>
+                  <td>{{ line.morderqty|floatformat }}</td>
+                  <td>{{ line.mshipqty|floatformat }}</td>
+                  <td>{{ line.mlineshipdate|date:'M. jS, Y' }}</td>
+                  <td>{{ line.mbackorderqty|floatformat }}</td>
+                  <td>{{ line.extended_price|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- /Line Details -->
+
+</body>
+{% endblock %}
+
+</html>

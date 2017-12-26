@@ -1,0 +1,175 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<html>
+  <head>
+    <script type="text/javascript">
+
+      // Load the Visualization API and the corechart package.
+      google.charts.load('visualization', {'packages':['corechart', 'bar']});
+
+      // Set a callback to run when the Google Visualization API is loaded.
+      // google.charts.setOnLoadCallback(drawPieChart);
+      google.charts.setOnLoadCallback(drawColChart);
+      google.charts.setOnLoadCallback(drawBarChart);
+
+      var colData;
+      var colChart;
+      var barData;
+      var barChart;
+      var total_orders = 0;
+
+      function drawBarChart() {
+
+        // Create the data table.
+        barData = new google.visualization.DataTable();
+        barData.addColumn('string', '');
+        barData.addColumn('number', 'Count');
+
+        {% for status in orders_by_status %}
+          barData.addRows([
+            ['{{ status.Status }}', {{ status.Cnt }}]
+          ]);
+          total_orders += {{status.Cnt}};
+        {% endfor %}
+
+        var options = {
+          chart: {
+            title: 'Orders by Current Status',
+            height: '100%',
+          },
+          backgroundColor: 'transparent',
+          chartArea: {
+            backgroundColor: 'transparent'
+          },
+          bars: 'horizontal', // Required for Material Bar Charts.
+          colors: '#1b9e77',
+          legend: { position: 'none' },
+        };
+
+        barChart = new google.charts.Bar(document.getElementById('bar_chart_div'));
+        barChart.draw(barData, google.charts.Bar.convertOptions(options));
+
+        $('#total_orders_status').text(total_orders);
+
+        google.visualization.events.addListener(barChart, 'select', selectBar);
+
+      };
+
+      function drawColChart() {
+
+        // Create the data table.
+        colData = new google.visualization.DataTable();
+        var total_orders = 0;
+
+        colData.addColumn('string', '');
+        colData.addColumn('number', 'Amazon');
+        colData.addColumn({type: 'string', role: 'annotation'});
+        colData.addColumn('number', 'Magento');
+        colData.addColumn({type: 'string', role: 'annotation'});
+        colData.addColumn('number', 'Overstock');
+        colData.addColumn({type: 'string', role: 'annotation'});
+        colData.addColumn('number', 'Phone');
+        colData.addColumn({type: 'string', role: 'annotation'});
+        colData.addColumn('number', 'Recurring');
+        colData.addColumn({type: 'string', role: 'annotation'});
+        colData.addColumn('number', 'Wholesale');
+        colData.addColumn({type: 'string', role: 'annotation'});
+
+        {% for hour in orders_by_hour %}
+          colData.addRows([
+            ['{{ hour.CaptureHour }}', {{ hour.AZ }}, 'AZ', {{ hour.MGN }}, 'MGN', {{ hour.OS }}, 'OS', {{ hour.PH }}, 'PH', {{ hour.UF }}, 'UF', {{ hour.WH }}, 'WH']
+          ]);
+          total_orders += {{hour.Cnt}};
+        {% endfor %}
+
+        // Set chart options
+        var options = {
+          chart: {
+            title:'Orders by Hour',
+            height:'100%',
+          },
+          backgroundColor:'transparent',
+          chartArea: {
+            backgroundColor: 'transparent'
+          },
+          hAxis: {
+            title: null,
+            format: 'h:mm a',
+          },
+          vAxis: {
+            title: null
+          },
+          legend: { position: 'right' },
+          bars: 'vertical',
+          isStacked: true,
+          focusTarget: 'category',
+          // colors:['#1E88E5', '#00ACC1', '#43A047', '#C0CA33', '#FFB300'],
+          series: {
+            0:{color:'#3949ab'},
+            1:{color:'#00acc1'},
+            2:{color:'#fdd835'},
+            3:{color:'#43a047'},
+            4:{color:'#ff9800'},
+            5:{color:'#ff5722'},
+          }
+        };
+
+        // Instantiate and draw our chart, passing in some options.
+        colChart = new google.charts.Bar(document.getElementById('col_chart_div'));
+        colChart.draw(colData, google.charts.Bar.convertOptions(options));
+
+        $('#total_orders_hour').text(total_orders);
+
+        google.visualization.events.addListener(colChart, 'select', selectCol);
+
+      };
+
+      function selectCol(){
+        var selection = colChart.getSelection();
+        if (typeof selection[0] == "undefined" || selection[0].row == null) {
+          colChart.setSelection();
+          return;
+        }
+        colChart.setSelection([{row:selection[0].row,column:1},{row:selection[0].row,column:3},{row:selection[0].row,column:5},{row:selection[0].row,column:7},{row:selection[0].row,column:9}]);
+        var hour = colData.getValue(selection[0].row,0);
+        var hour_int = parseInt(hour);
+        if (hour.slice(-2) == 'PM') {
+          hour_int = hour_int + 12;
+        }
+        if (parseInt(hour) == 12) {
+          hour_int += -12;
+        }
+        $("#hour_table_placeholder").load("/orders/hour/" + hour_int + '/' + $('#overview_date').val().replace('/', '.').replace('/', '.'));
+        $("#hour_panel_heading").text("Orders for " + hour);
+      };
+
+      function selectBar(){
+        var selection = barChart.getSelection();
+        if (typeof selection[0] == "undefined") {
+          return;
+        }
+        var status = barData.getValue(selection[0].row, 0);
+
+        $("#status_table_placeholder").load("/orders/status/" + status + '/' + $('#overview_date').val().replace('/', '.').replace('/', '.'));
+        $("#status_panel_heading").text("Orders for Status: " + status);      
+      };
+
+    </script>
+  </head>
+
+  <body>
+    <div class="row">
+      <div class="col-lg-5" style="padding-left: 20px; padding-right: 20px;">
+        <div id="bar_chart_div" style="height: 300px;"></div>
+        <h3>Total Orders: <span id="total_orders_status"></span></h3>
+      </div>
+      <div class="col-lg-7" style="padding-left: 20px; padding-right: 20px;">
+        <div id="col_chart_div" style="height: 300px;"></div>
+        <h3>Total Orders: <span id="total_orders_hour"></span></h3>
+      </div>
+    </div>
+  </body>
+</html>

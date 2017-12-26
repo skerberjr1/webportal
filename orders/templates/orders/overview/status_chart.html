@@ -1,0 +1,77 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<html>
+  <head>
+    <script type="text/javascript">
+
+      // Load the Visualization API and the corechart package.
+      google.charts.load('visualization', {'packages':['corechart', 'bar']});
+
+      // Set a callback to run when the Google Visualization API is loaded.
+      google.charts.setOnLoadCallback(drawBarChart);
+
+      var barData;
+      var barChart;
+      var total_orders = 0;
+
+      function drawBarChart() {
+
+        // Create the data table.
+        barData = new google.visualization.DataTable();
+        barData.addColumn('string', '');
+        barData.addColumn('number', 'Count');
+
+        {% for status in orders %}
+          barData.addRows([
+            ['{{ status.Status }}', {{ status.Cnt }}]
+          ]);
+          total_orders += {{status.Cnt}};
+        {% endfor %}
+
+        var options = {
+          chart: {
+            title: null,
+            height: '100%',
+          },
+          backgroundColor: 'transparent',
+          chartArea: {
+            backgroundColor: 'transparent'
+          },
+          bars: 'horizontal', // Required for Material Bar Charts.
+          colors: '#1b9e77',
+          legend: { position: 'none' },
+        };
+
+        barChart = new google.charts.Bar(document.getElementById('bar_chart_div'));
+        barChart.draw(barData, google.charts.Bar.convertOptions(options));
+
+        $('#total_orders_status').text(total_orders.toLocaleString());
+
+        google.visualization.events.addListener(barChart, 'select', selectBar);
+
+      };
+
+      function selectBar(){
+        var today = new Date();
+        var selection = barChart.getSelection();
+        if (typeof selection[0] == "undefined") {
+          return;
+        }
+        var status = barData.getValue(selection[0].row, 0);
+
+        $("#status_table_placeholder").load("/orders/status?status=" + status + '&date=' + today.toLocaleString().slice(0, 10).replace('/', '.').replace('/', '.').replace(',', ''));
+        $("#status_panel_heading").text("Orders for Status: " + status);      
+      };
+    </script>
+  </head>
+
+  <body>
+    <div style="padding-left: 20px; padding-right: 20px; height: 100%;">
+      <div id="bar_chart_div" style="height: 85%;"></div>
+      <h3>Total Orders: <span id="total_orders_status"></span></h3>
+    </div>
+  </body>
+</html>

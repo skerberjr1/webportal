@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html lang="en">
+  
+  {% block navbar_class-fba_orders_overview %}active{% endblock %}
+
+  {% block content %}
+  <head>
+    <link href="{% static 'orders/css/datepicker.css' %}" rel="stylesheet">
+    <script src="{% static 'orders/js/bootstrap-datepicker.js' %}"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  </head>
+
+  <body>
+    <h1 class="page-header">FBA Orders Overview</h1>
+    <div class="col-md-8">
+      <div class="row">
+        <div class="form-group">
+          <div class="col-md-5">
+            <label for="begin_date">Begin Date</label>
+            <input class="dateinput dateinput-lg form-control fba-param" id="begin_date" type="text">
+          </div>
+          <div class="col-md-5">
+            <label for="end_date">End Date</label>
+            <input class="dateinput dateinput-lg form-control fba-param" id="end_date" label="End Date" type="text">
+          </div>
+          <div class="col-md-3">
+            <label for="interval">Interval</label>
+            <select class="form-control fba-param" id="interval">
+              <option>Day</option>
+              <option>Week</option>
+              <option>Month</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="row container-fluid">
+        <div id="charts"></div>
+      </div>
+
+    </div>
+
+    <script>
+      $(document).ready(function() {
+        var today = new Date();
+        var begin = new Date();
+        begin.setDate(begin.getDate() - 14);
+
+        $('#begin_date').val(begin.getMonth()+1 + "/" + begin.getDate() + "/" + begin.getFullYear());
+        $('#end_date').val(today.getMonth()+1 + "/" + today.getDate() + "/" + today.getFullYear());
+        $('.dateinput').datepicker({ format: "mm/dd/yyyy" });
+
+        function loadChart() {
+          var url = '/orders/fba_orders/charts/'
+          url += $('#begin_date').val().replace('/', '.').replace('/', '.') + '/'
+          url += $('#end_date').val().replace('/', '.').replace('/', '.') + '/'
+          url += $('#interval').val()
+          $('#charts').load(url);
+        };
+
+        loadChart();
+
+        $('.dateinput').datepicker()
+          .on('changeDate', function (e) {
+            loadChart();
+          });
+        $('.fba-param').change(function() {
+          loadChart();
+        });
+      }); 
+    </script>
+
+  </body>
+  {% endblock %}
+</html>

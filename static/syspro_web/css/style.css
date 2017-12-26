@@ -1,0 +1,202 @@
+body {
+    background-color: #676d80;
+    font-family: "Apercu Medium", Calibri, Roboto, sans-serif;
+    font-weight: 400;
+}
+
+#page-wrapper {
+    background-color: #f0efeb;
+}
+
+table.table + ul.pagination {
+    overflow: auto;
+    padding: 0px;
+    border: 1px solid #DDD;
+    margin: 10px;
+    list-style: none;
+}
+
+table.table + ul.pagination > li {
+    float: left;
+    line-height: 22px;
+}
+
+table.table + ul.pagination > li.cardinality {
+    float: right;
+    color: #8d8d8d;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    padding-right: 12px;
+    padding-left: 12px;
+    margin-left: -1px;
+    height: 34px;
+}
+
+table.table + ul.pagination > li.current {
+    padding-top: 6px;
+    padding-bottom: 6px;
+    padding-right: 12px;
+    padding-left: 12px;
+    margin-left: -1px;
+    height: 34px;
+}
+
+table.table + ul.pagination > li > a {
+    border-top: 0px;
+    border-bottom: 0px;
+    height: 34px;
+}
+
+table.table + ul.pagination > li:first-child > a {
+    margin-left: -1;
+    border-left: 0px;
+}
+
+#search_table thead > tr > th {
+    padding-top: 16px;
+}
+
+th.orderable > a {
+    padding-right: 30px;
+    background: url(../img/inactive-up.png) right center no-repeat
+}
+
+th.orderable.asc > a {
+    background-image: url(../img/sort-up.png);
+}
+
+th.orderable.desc > a {
+    background-image: url(../img/sort-down.png);
+}
+
+.navbar-default {
+    background-color: #676d80;
+    border-color: #5a6175;
+}
+
+.navbar-static-top {
+    background-color: #5a6175;
+}
+
+.navbar-default .navbar-brand {
+    color: #f5987b;
+    font-family: "Apercu Medium", Calibri, Roboto, sans-serif;
+    font-weight: 400;
+    font-size: 22px;
+}
+
+.navbar-right {
+    color: #f5987b;
+    font-size: 16px;
+}
+
+.navbar-default .navbar-brand:focus, .navbar-default .navbar-brand:hover {
+    color: #f5987b;
+    background-color: #eeeeee;
+}
+
+.panel-default > .panel-heading {
+    background-color: #82CCC8;
+    color: #ffffff;
+}
+
+.navbar-default > .sidebar-nav a, .navbar-right a {
+    color: #f5987b;
+    margin-left: 4px;
+}
+
+.navbar-default > .sidebar-nav .input-group {
+    margin-top: 10px;
+    margin-bottom: 6px;
+}
+
+.panel-default > .panel-body {
+}
+
+.panel-heading {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    font-size: 18px;
+}
+
+.panel-heading .btn {
+    padding-top: 4px;
+    padding-bottom: 4px;
+    margin-left: 4px;
+    margin-right: 4px;
+    font-size: 12px;
+}
+
+.panel-body .panel {
+    margin-bottom: 8px;
+}
+
+.panel-body ul {
+    margin-bottom: 8px;
+}
+
+.panel li.list-group-item {
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+.panel > ul > li:last-child {
+    border-bottom: 0px;
+}
+
+.weather-tab p {
+    font-size: 16px;
+}
+
+.weather-tab > li .well {
+    background-color: #ffbda9;
+}
+
+.ui-autocomplete {
+    cursor:default;
+    z-index:9999 !important;
+}
+
+.clickable-row {
+    cursor: pointer;
+}
+
+.index-table {
+    height: 590px;
+    overflow-y: scroll;
+}
+
+.animated-link {
+    display: inline-block;
+    text-decoration: none;
+}
+
+.animated-link::after {
+    content: '';
+    display: block;
+    width: 0;
+    height: 2px;
+    background: #f5987b;
+    transition: width .3s;
+}
+
+.animated-link:hover {
+    text-decoration: none;
+}
+
+.animated-link:visited {
+    text-decoration: none;
+}
+
+.animated-link:hover::after {
+    width: 100%;
+}
+
+.btn-group {
+    padding-bottom: 6px;
+}
+
+.btn-info.active {
+    background-color: #348da8;
+    border-color: #2183a1;
+}

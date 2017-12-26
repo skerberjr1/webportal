@@ -1,0 +1,36 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<html>
+  <body>
+    <div class="table-responsive">
+      <table class="table table-striped sortable">
+        <thead>
+          <tr>
+            <th data-defaultsort="asc">Sales Order</th>
+            <th>Customer PO Number</th>
+            <th>Order Status</th>
+            <th data-dateformat="mm/DD/YYYY hh:mm a">Order Date</th>
+            <th>Salesperson</th>
+            <th>Customer</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for order in orders_for_hour %}
+            <tr>
+              <td><a href="/orders/{{ order.SalesOrder }}/">{{ order.SalesOrder }}</a></td>
+              <td>{{ order.CustomerPoNumber }}</td>
+              <td>{{ order.OrderStatus }}</td>
+              <td class="date-field" data-dateformat="mm/DD/YYYY hh:mm a">{{ order.OrderDateTime|date:"SHORT_DATETIME_FORMAT"}}</td>
+              <td>{{order.Salesperson}}</td>
+              <td>{{ order.Customer }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <script type="text/javascript">$.bootstrapSortable(true);</script>
+  </body>
+</html>

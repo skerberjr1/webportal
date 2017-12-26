@@ -1,0 +1,52 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<html>
+  <head>
+
+    <script type="text/javascript">
+      google.charts.load('visualization', {'packages':['corechart', 'bar']});
+
+      google.charts.setOnLoadCallback(drawBarChart);
+
+      var barData;
+      var barChart;
+
+      function drawBarChart() {
+
+        // Create the data table.
+        barData = new google.visualization.DataTable();
+        barData.addColumn('string', '');
+        barData.addColumn('number', 'Count');
+
+        {% for status in orders_by_status %}
+          barData.addRows([
+            ['{{ status.Status }}', {{ status.Cnt }}]
+          ]);
+        {% endfor %}
+
+        var options = {
+          chart: {
+            height: '100%',
+          },
+          backgroundColor: 'transparent',
+          chartArea: {
+            backgroundColor: 'transparent'
+          },
+          bars: 'horizontal', // Required for Material Bar Charts.
+          colors: '#1b9e77',
+          legend: { position: 'none' },
+        };
+
+        barChart = new google.charts.Bar(document.getElementById('bar_chart_div'));
+        barChart.draw(barData, google.charts.Bar.convertOptions(options));
+
+      };
+    </script>
+  </head>
+
+  <body>
+    <div id="bar_chart_div"></div>
+  </body>

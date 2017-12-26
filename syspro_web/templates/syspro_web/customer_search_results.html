@@ -1,0 +1,20 @@
+{% extends "syspro_web/base.html" %}
+{% load staticfiles %}
+{% load django_tables2 %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+{% block content %}
+<body>
+  <div class="row">
+    <div class="col-lg-12">
+      <h1 class="page-header">Customer Search Results</h1>
+    </div>
+  </div>
+  <div id='customer_search_table' class="row">
+    {% render_table customers_table %}
+  </div>
+</body>
+{% endblock %}
+</html>

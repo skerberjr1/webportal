@@ -1,0 +1,341 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html lang="en">
+  {% block navbar_class-item_sales %}active{% endblock %}
+  
+  {% block content %}
+  <head>
+    <link href="{% static 'orders/css/datepicker.css' %}" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="{% static 'orders/css/loading.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.10.0/css/bootstrap-select.min.css">
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/js/bootstrap-datepicker.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.10.0/js/bootstrap-select.min.js"></script>
+  </head>
+
+  <body ng-app="tableCsv" ng-controller="sampleController">
+    <div class="page-header">
+      <h1>Item Sales History</h1>
+    </div>
+
+    <div class="row">
+      <div class="col-md-12">
+        <div class="alert alert-info" role="alert">
+          <b>Note:</b> Data presented is based on Order Date.
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <div class="row">
+            <div class="col-lg-2 col-sm-3">
+              <h3 class="panel-title panel-heading-padfix">
+                <button class="btn btn-default" id="item_refresh">
+                  <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
+                </button>
+                Refresh
+              </h3>
+            </div>
+            <div class="col-lg-10 col-sm-9">
+              <div class="row">
+                <div class="col-lg-4 col-sm-4">
+                  <label for="begin_date" class="heading-label">Begin Date</label>
+                  <input type="text" id="begin_date" class="dateinput form-control panel-heading-input">
+                </div>
+                <div class="col-lg-4 col-sm-4">
+                  <label for="end_date" class="heading-label">End Date</label>
+                  <input type="text" id="end_date" class="dateinput form-control panel-heading-input">
+                </div>
+                <div class="col-lg-4 col-sm-4">
+                  <label for="interval" class="heading-label">Interval</label>
+                  <select id="interval" class="form-control dropdown panel-heading-input">
+                    <option value="day">Day</option>
+                    <option value="week">Week</option>
+                    <option value="month">Month</option>
+                    <option value="year">Year</option>
+                  </select>
+                </div>
+                <div class="col-lg-4 col-sm-4">
+                  <label for="group" class="heading-label">Aggregate by</label>
+                  <select id="group" class="form-control dropdown panel-heading-input">
+                    <option value="sku">SKU</option>
+                    <option value="mpn">MPN</option>
+                    <option value="product_class">Product Class</option>
+                    <option value="brand">Brand</option>
+                    <option value="manufacturer">Manufacturer</option>
+                    <option value="supplier">Supplier</option>
+                  </select>
+                </div>
+                <div class="col-lg-4 col-sm-4">
+                  <label for="unit_display" class="heading-label">Display</label>
+                  <select id="unit_display" class="form-control dropdown panel-heading-input">
+                    <option value="qty_sold">Qty Sold</option>
+                    <option value="num_orders"># Orders</option>
+                    <option value="sales_value">Sales $</option>
+                  </select>
+                </div>
+                <div class="col-lg-4 col-sm-4">
+                  <label for="channel" class="heading-label">Channel</label>
+                  <select id="channel" class="form-control dropdown panel-heading-input">
+                    <option value="all">All</option>
+                    <option value="northshore">Northshore</option>
+                    <option value="amazon">Amazon</option>
+                    <option value="overstock">Overstock</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="row">
+            <div class="col-md-4" style="padding-bottom: 20px">
+              <div class="input-group" id="item_field_input_group">
+                <span class="input-group-addon" id="item_field_input">SKU:</span>
+                <select id="item" class="form-control">
+                  <option value="all">Select from List</option>
+                  {% for s in skus %}
+                    <option>{{ s.StockCode }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <h2 id="item_chart_title"></h2>
+          </div>
+          <div class="row">
+            <div class="col-sm-12 overview-chart" id="item_sales_chart"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-4">
+          <div id="floatingCirclesG" class="floatingCirclesTable">
+            <div class="f_circleG" id="frotateG_01"></div>
+            <div class="f_circleG" id="frotateG_02"></div>
+            <div class="f_circleG" id="frotateG_03"></div>
+            <div class="f_circleG" id="frotateG_04"></div>
+            <div class="f_circleG" id="frotateG_05"></div>
+            <div class="f_circleG" id="frotateG_06"></div>
+            <div class="f_circleG" id="frotateG_07"></div>
+            <div class="f_circleG" id="frotateG_08"></div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div id="floatingCirclesG" class="floatingCirclesTable">
+            <div class="f_circleG" id="frotateG_01"></div>
+            <div class="f_circleG" id="frotateG_02"></div>
+            <div class="f_circleG" id="frotateG_03"></div>
+            <div class="f_circleG" id="frotateG_04"></div>
+            <div class="f_circleG" id="frotateG_05"></div>
+            <div class="f_circleG" id="frotateG_06"></div>
+            <div class="f_circleG" id="frotateG_07"></div>
+            <div class="f_circleG" id="frotateG_08"></div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div id="floatingCirclesG" class="floatingCirclesTable">
+            <div class="f_circleG" id="frotateG_01"></div>
+            <div class="f_circleG" id="frotateG_02"></div>
+            <div class="f_circleG" id="frotateG_03"></div>
+            <div class="f_circleG" id="frotateG_04"></div>
+            <div class="f_circleG" id="frotateG_05"></div>
+            <div class="f_circleG" id="frotateG_06"></div>
+            <div class="f_circleG" id="frotateG_07"></div>
+            <div class="f_circleG" id="frotateG_08"></div>
+          </div>
+        </div>
+
+        <div class="col-sm-12" id="item_sales_table"></div>
+      </div>
+      
+      <div class="modal fade" id="selection_modal" tabindex="-1" role="dialog" aria-labelledby="selection_modal_label">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title" id="selection_modal_label1"><strong>Sales Orders</strong></h4>
+              <h4 class="modal-title" id="selection_modal_label2"></h4>
+              <button export-to-csv class="btn btn-default pull-right"><span class="glyphicon glyphicon-file"></span> Export</button>
+            </div>
+            <div class="modal-body" id="selection_modal_body">
+              
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="text/javascript">
+    var begin_date
+    var end_date
+    var interval
+    var group
+    var unit_display
+
+      $(document).ready(function() {
+        var today = new Date();
+        var week_prior = new Date();
+        week_prior.setDate(week_prior.getDate() - 7);
+
+        $('.dateinput').datepicker({ format: "m/d/yyyy" });
+        $('#begin_date').datepicker('update', week_prior.toLocaleDateString());
+        $('#end_date').datepicker('update', today.toLocaleDateString());
+
+        loadItemTable();
+        loadItemChart();
+
+        function loadItemChart () {
+          $('.chart_container').css("display","none");
+
+          begin_date = $('#begin_date').val().replace('/', '.').replace('/', '.');
+          end_date = $('#end_date').val().replace('/', '.').replace('/', '.');
+          interval = $('#interval').val();
+          group = $('#group').val();
+          unit_display = $('#unit_display').val();
+          item = $('#item').val();
+
+          $('#item_sales_chart').load('/orders/charts/hour_chart' + 
+            '?begin_date=' + begin_date +
+            '&end_date=' + end_date +
+            '&interval=' + interval +
+            '&group=' + group +
+            '&unit_display=' + unit_display +
+            '&item=' + item +
+            '&item_sales=True'
+            )
+        }
+
+        function loadItemTable () {
+          $('.sku-sum-panel').css("display","none");
+
+          begin_date = $('#begin_date').val().replace('/', '.').replace('/', '.');
+          end_date = $('#end_date').val().replace('/', '.').replace('/', '.');
+          group = $('#group').val();
+          channel = $('#channel').val();
+
+          $(".floatingCirclesTable").css("display","block");
+          $('#item_sales_table').load(
+            '/orders/item_sales/table?begin_date=' + begin_date + 
+            '&end_date=' + end_date +
+            '&group=' + group +
+            '&channel=' + channel, 
+            function() {
+              $(".floatingCirclesTable").css("display","none");
+            }
+          );
+        }
+
+        $('.dateinput').datepicker().on('changeDate', function() {
+          loadItemChart();
+          loadItemTable();
+        });
+
+        $('#item').selectpicker({size: 10, liveSearch: true,});
+        
+        $('#item_refresh').click(function() {
+          loadItemChart();
+        });
+
+        $('#group').change(function() {
+          if ($('#group').val() == 'product_class') {
+            $('#item_field_input_group').html(
+                '<span class="input-group-addon" id="item_field_input">Product Class:</span>' +
+                '<select id="item" class="form-control">' +
+                '<option value="all">Select from List</option>' +
+                {% for p in product_classes %}
+                  '<option value="{{ p.ProductClass }}">{{ p.ProductClass }}</option>' +
+                {% endfor %}
+                '</select>'
+              );
+          }
+          else if ($('#group').val() == 'sku') {
+            $('#item_field_input_group').html(
+                '<span class="input-group-addon" id="item_field_input">SKU:</span>' +
+                '<select id="item" class="form-control">' +
+                '<option value="all">Select from List</option>' +
+                  {% for s in skus %}
+                    '<option>{{ s.StockCode }}</option>' +
+                  {% endfor %}
+                '</select>'
+              );
+          }
+          else if ($('#group').val() == 'mpn') {
+            $('#item_field_input_group').html(
+              '<span class="input-group-addon" id="item_field_input">MPN:</span>' +
+              '<select id="item" class="form-control">' +
+              '<option value="all">Select from List</option>' +
+                {% for m in mpns %}
+                  '<option>{{ m.AlternateKey1 }}</option>' +
+                {% endfor %}
+              '</select>'
+            );
+          }
+          else if ($('#group').val() == 'brand') {
+            $('#item_field_input_group').html(
+              '<span class="input-group-addon" id="item_field_input">Brand:</span>' +
+              '<select id="item" class="form-control">' +
+              '<option value="all">Select from List</option>' +
+                {% for b in brands %}
+                  '<option value="{{ b.Brand|slugify }}">{{ b.Brand }}</option>' +
+                {% endfor %}
+              '</select>'
+            );
+          }
+          else if ($('#group').val() == 'manufacturer') {
+            $('#item_field_input_group').html(
+              '<span class="input-group-addon" id="item_field_input">Manufacturer:</span>' +
+              '<select id="item" class="form-control">' +
+              '<option value="all">Select from List</option>' +
+                {% for m in manufacturers %}
+                  '<option value="{{ m.Manufacturer|slugify }}">{{ m.Manufacturer }}</option>' +
+                {% endfor %}
+              '</select>'
+            );
+          }
+          else if ($('#group').val() == 'supplier') {
+            $('#item_field_input_group').html(
+              '<span class="input-group-addon" id="item_field_input">Supplier:</span>' +
+              '<select id="item" class="form-control">' +
+              '<option value="all">Select from List</option>' +
+                {% for u in suppliers %}
+                  '<option value="{{ u.ConcatSupplier|slugify }}">{{ u.ConcatSupplier }}</option>' +
+                {% endfor %}
+              '</select>'
+            );
+          }
+
+          $('#item').change(function() {loadItemChart()});
+          $('#item').selectpicker({size: 10, liveSearch: true,});
+
+          loadItemTable();
+        });
+
+        $('.dropdown').change(function() {loadItemChart()});
+        $('#item').change(function() {loadItemChart()});
+        $('#channel').change(function() {
+          selectChannel($(this).val());
+          loadItemTable();
+        });
+
+        $(window).resize(function() {
+          if(this.resizeTO) clearTimeout(this.resizeTO);
+          this.resizeTO = setTimeout(function() {
+            $(this).trigger('resizeEnd');
+          }, 500);
+        });
+
+        $(window).on('resizeEnd', function() {loadItemChart()});
+      });
+    </script>
+  </body>
+  {% endblock %}
+
+</html>

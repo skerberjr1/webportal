@@ -1,0 +1,255 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<html>
+  <head>
+    <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script> -->
+
+    <script type="text/javascript">
+      // Load the Visualization API and the corechart package.
+      google.charts.load('visualization', {'packages':['corechart', 'bar']});
+
+      // Set a callback to run when the Google Visualization API is loaded.
+      // google.charts.setOnLoadCallback(drawPieChart);
+      google.charts.setOnLoadCallback(drawColChart);
+      var colData;
+      var colChart;
+      var total_orders = 0;
+      var options;
+
+      function drawColChart() {
+
+        // Create the data table.
+        colData = new google.visualization.DataTable();
+        var total_orders = 0;
+
+        colData.addColumn('string', '');
+        colData.addColumn('string', 'date');
+        {% if request.GET.item_sales %}
+          colData.addColumn('number', 'Amazon FBA');
+          colData.addColumn('number', 'Amazon FBM');
+        {% else %}
+          colData.addColumn('number', 'Amazon');
+        {% endif %}
+        colData.addColumn('number', 'Overstock');
+        colData.addColumn('number', 'Magento');
+        colData.addColumn('number', 'Phone');
+        colData.addColumn('number', 'Recurring');
+        colData.addColumn('number', 'Wholesale');
+        colData.addColumn('number', 'Total');
+
+        {% for hour in orders %}
+          colData.addRows([
+            ['{{ hour.CaptureTime }}', 
+            '{{ hour.OrderDate }}', 
+            {% if request.GET.item_sales %}
+              {{ hour.AF|default_if_none:0}},
+            {% endif %}
+            {{ hour.AZ|default_if_none:0 }},
+            {{ hour.OS|default_if_none:0 }},
+            {{ hour.MGN|default_if_none:0 }},
+            {{ hour.PH|default_if_none:0 }},
+            {{ hour.UF|default_if_none:0 }}, 
+            {{ hour.WH|default_if_none:0 }}, 
+            {{ hour.Cnt|default_if_none:0 }}]
+          ]);
+          total_orders += {{hour.Cnt}};
+        {% endfor %}
+
+        // Set chart options
+        options = {
+          chart: {
+            title: null,
+            height:'100%',
+          },
+          backgroundColor:'transparent',
+          chartArea: {
+            backgroundColor: 'transparent',
+            height:'100%',
+          },
+          vAxis: {
+            title: null
+          },
+          legend: { position: 'right' },
+          bars: 'vertical',
+          isStacked: true,
+          focusTarget: 'category',
+          // colors:['#1E88E5', '#00ACC1', '#43A047', '#C0CA33', '#FFB300'],
+          series: {
+            0:{color:'#3949ab'},
+            1:{color:'#00acc1'},
+            2:{color:'#fdd835'},
+            3:{color:'#43a047'},
+            4:{color:'#ff9800'},
+            5:{color:'#ff5722'},
+            6:{color:'#512da8'},
+          }
+        };
+
+        // Instantiate and draw our chart, passing in some options.
+        colView = new google.visualization.DataView(colData);
+
+        var cols = colData.getNumberOfColumns() - 1;
+        colView.hideColumns([1, cols]);
+
+        {% if request.GET.item_sales %}
+          total_orders = selectChannel($('#channel').val());
+        {% endif %}
+
+        colChart = new google.charts.Bar(document.getElementById('hour_chart_div'));
+        colChart.draw(colView, google.charts.Bar.convertOptions(options));
+
+        if ($('#unit_display').val() == 'qty_sold') {
+          $('#summary_heading').text('Total Quantity Sold: ');
+          $('#total_orders_hour').text(total_orders.toLocaleString());
+        }
+        else if ($('#unit_display').val() == 'num_orders') {
+          $('#summary_heading').text('Total Orders: ');
+          $('#total_orders_hour').text(total_orders.toLocaleString());
+        }
+        else if ($('#unit_display').val() == 'sales_value') {
+          $('#summary_heading').text('Total Sales Value: $');
+          $('#total_orders_hour').text(Number(total_orders.toFixed(2)).toLocaleString());
+        }
+        else {
+          $('#summary_heading').text('Total Orders: ');
+          $('#total_orders_hour').text(total_orders.toLocaleString());
+        }
+
+        google.visualization.events.addListener(colChart, 'select', selectCol);
+
+      };
+
+      function selectCol(){
+        var selection = colChart.getSelection();
+        var cols = colData.getNumberOfColumns();
+
+        if (typeof selection[0] == "undefined") {
+          colChart.setSelection();
+          return;
+        }
+
+        if (selection[0].row == null) {
+          var total = 0;
+          var col = selection[0].column + 1;
+          for (var i = 2; i < cols; i++) {
+            if (i != col) {
+              colView.hideColumns([i]);
+            }
+          }
+
+          for (var j = 0; j < colData.getNumberOfRows(); j++) {
+            total += colData.getValue(j, col);
+          }
+
+          colChart.draw(colView, google.charts.Bar.convertOptions(options));
+          $('#total_orders_hour').text(total.toLocaleString());
+
+          return;
+        }
+
+        {% if request.GET.item_sales %}
+          $('#selection_modal_body').html('');
+          $('#selection_modal').modal('show');
+
+          var begin_date = $('#begin_date').val();
+          var end_date = $('#end_date').val();
+          var interval = $('#interval').val();
+          var group = $('#group').val();
+          var item = $('#item').val();
+          var row = selection[0].row;
+          var col = selection[0].column + 1;
+          if ($('#channel').val() == 'northshore') { col += 3; }
+          else if ($('#channel').val() == 'overstock') { col += 2; }
+          var select_date = colData.getValue(row, 0);
+          var salesperson = colData.getColumnLabel(col).replace(' ', '');
+
+          $('#selection_modal_label2').text(item + ": " + colData.getColumnLabel(col));
+
+          $('#selection_modal_body').load(
+            "/orders/item_sales/selection_table?begin_date=" + begin_date +
+            "&end_date=" + end_date +
+            "&select_date=" + select_date +
+            "&interval=" + interval +
+            "&salesperson=" + salesperson +
+            "&group=" + group +
+            "&item=" + item
+          );
+        {% endif %}
+
+        {% if not request.GET.item_sales %}
+          colChart.setSelection([{row:selection[0].row,column:1},{row:selection[0].row,column:2},{row:selection[0].row,column:3},{row:selection[0].row,column:4},{row:selection[0].row,column:5},{row:selection[0].row,column:6}]);
+        {% endif %}
+
+        var time = colData.getValue(selection[0].row,0);
+        var date = colData.getValue(selection[0].row,1);
+        var total = colData.getValue(selection[0].row,8);
+
+        if ($('#interval').val() != 'hour') {
+          $("#hour_panel_heading").html("Orders for " + time + ': <b>' + total.toLocaleString() + '</b>');
+          return;
+        }
+
+        var hour_int = parseInt(time);
+
+        if (time.slice(-2) == 'PM') {
+          hour_int = hour_int + 12;
+        }
+        if (parseInt(time) == 12) {
+          hour_int += -12;
+        }
+
+        $("#hour_table_placeholder").load("/orders/hour?hour=" + hour_int + '&date=' + date.replace('/', '.').replace('/', '.'));
+        $("#hour_panel_heading").html("Orders for " + time + ': <b>' + total.toLocaleString() + '</b>');
+      };
+
+      function selectChannel(channel){
+        var colCount = colData.getNumberOfColumns();
+        var rowCount = colData.getNumberOfRows();
+        total_orders = 0;
+
+        if (channel == 'all') {
+          for (var i = 2; i < colCount - 1; i++) {
+            for (var j = 0; j < rowCount; j++) {
+              total_orders += colData.getValue(j, i);
+            }
+          }
+          colView.setColumns([0,2,3,4,5,6,7,8]);
+        }
+        else if (channel == 'northshore') {
+          for (var i = 4; i < colCount - 1; i++) {
+            for (var j = 0; j < rowCount; j++) {
+              total_orders += colData.getValue(j, i);
+            }
+          }
+          colView.setColumns([0,5,6,7,8]);
+        }
+        else if (channel == 'amazon') {
+          for (var i = 2; i < 4; i++) {
+            for (var j = 0; j < rowCount; j++) {
+              total_orders += colData.getValue(j, i);
+            }
+          }
+          colView.setColumns([0,2,3]);
+        }
+        else if (channel == 'overstock') {
+          for (var j = 0; j < rowCount; j++) {
+            total_orders += colData.getValue(j, 5);
+          }
+          colView.setColumns([0,4]);
+        }
+
+        return total_orders;
+      }
+    </script>
+  </head>
+
+  <body>
+    <div style="padding-left: 20px; padding-right: 20px; height: 100%" class="chart_container">
+      <div id="hour_chart_div" style="height: 85%"></div>
+      <h3><span id="summary_heading"></span><span id="total_orders_hour"></span></h3>
+    </div>
+  </body>

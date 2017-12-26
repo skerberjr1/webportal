@@ -1,0 +1,30 @@
+{% load staticfiles %}
+{% load render_table from django_tables2 %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<html>
+<body>
+  <div class="index-table">
+    {% render_table orders_table %}
+  </div>
+  <script type="text/javascript">
+    $('table').each(function(a, tbl) {
+      var currentTableRows = $(this).find("tr").length - 1;
+      $(tbl).find('th').each(function(i) {
+        var removeVal = 0;
+        var currentTable = $(this).parents('table');
+
+        var tds = currentTable.find('tr td:nth-child(' + (i + 1) + ')');
+        tds.each(function(j) { if ($(this).text().trim() == '') removeVal++; });
+        
+        if (removeVal == currentTableRows) {
+          $(this).hide();
+          tds.hide();
+        }
+      });
+    });
+  </script>
+</body>
+</html>

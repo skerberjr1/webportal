@@ -1,0 +1,46 @@
+{% load staticfiles %}
+{% load crispy_forms_tags %}
+
+<!DOCTYPE html>
+<html lang="en">
+    
+  <head>
+    <link href="{% static 'authentication/css/account_detail.css' %}" rel="stylesheet">
+  </head>
+
+  <body>
+
+    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
+
+      <div class="panel panel-info">
+        <div class="panel-heading">
+          <h3 class="panel-title">{{ object.get_full_name }}</h3>
+        </div>
+
+        <div class="panel-body">
+          <table class="table table-user-information">
+            <tbody>
+              <tr>
+                <td class="col-md-3"><b>Username:</b></td>
+                <td class="col-md-9">{{ object.username }}</td>
+              </tr>
+              <tr>
+                <td class="col-md-3"><b>Email:</b></td>
+                <td class="col-md-9">{{ object.email }}</td>
+              </tr>
+              <tr>
+                <td class="col-md-3"><b>Department:</b></td>
+                <td class="col-md-9">{{ object.department }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+       
+        <div class="panel-footer">
+          <a data-original-title="Broadcast Message" data-toggle="tooltip" type="button" class="btn btn-sm btn-primary" href="mailto:{{ object.email }}"><i class="glyphicon glyphicon-envelope"></i></a>
+        </div>
+      </div>
+
+    </div>
+
+  </body>

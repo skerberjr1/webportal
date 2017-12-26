@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html lang="en">
+  
+  {% block navbar_class-backorder_orders %}active{% endblock %}
+
+  {% block content %}
+
+  <body ng-app="tableCsv" ng-controller="sampleController">
+    <h1 class="page-header">Backorder Orders</h1>
+    <div class="row">
+      <button export-to-csv class="btn btn-default pull-right"><span class="glyphicon glyphicon-file"></span> Export</button>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-striped sortable">
+        <thead>
+          <tr>
+            <th data-defaultsort="asc">Sales Order</th>
+            <th data-dateformat="MMM-D-YYYY hh:mm a">Order Date</th>
+            <th>Salesperson</th>
+            <th>Customer</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for order in backorder_orders %}
+            <tr>
+              <td><a href="/orders/{{ order.SalesOrder }}/">{{ order.SalesOrder }}</a></td>
+              <td data-dateformat="MMM-D-YYYY hh:mm a">{{ order.OrderDateTime }}</td>
+              <td>{{order.Salesperson}}</td>
+              <td>{{ order.Customer }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </body>
+  {% endblock %}
+</html>

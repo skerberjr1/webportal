@@ -1,0 +1,278 @@
+{% extends "syspro_web/base.html" %}
+{% load staticfiles %}
+{% load render_table from django_tables2 %}
+
+<!DOCTYPE html>
+<html lang="en">
+{% block content %}
+<body>
+  <div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header"><strong>{{ object.customer|floatformat }} </strong>{{ object.name }}</h1>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-5">
+      <div class="panel panel-default">
+        <div class="panel-heading">General Details</div>
+          <ul class="list-group">
+                <li class="list-group-item {% if customer_plus.customeralert|length > 1 %}list-group-item-warning{% endif %}">
+                  <strong>Customer Alert</strong>
+                  <span class="pull-right">{{ customer_plus.customeralert }}</span>
+                </li>
+                <li class="list-group-item">
+                  <strong>Date Created</strong>
+                  <span class="pull-right">{{ object.datecustadded|date:"DATE_FORMAT" }}</span>
+                </li>
+                <li class="list-group-item">
+                  <strong>Date Last Sale</strong>
+                  <span class="pull-right">{{ object.datelastsale|date:"DATE_FORMAT" }}</span>
+                </li>
+                <li class="list-group-item">
+                  <strong>No of Invoices</strong>
+                  <span class="pull-right">{{ object.invoicecount }}</span>
+                </li>
+                <li class="list-group-item">
+                  <strong>TBC Member</strong>
+                  <span class="pull-right">{{ customer_plus.tbcmember }}</span>
+                </li>
+                <li class="list-group-item">
+                  <strong>ND Buying Group</strong>
+                  <span class="pull-right">{% if object.buyinggroup2 == 'ND' %}Y{% else %}N{% endif %}</span>
+                </li>
+                {% if customer_plus.tbcmember == 'Y' %}
+                <li class="list-group-item">
+                  <strong>TBC Start Date</strong>
+                  <span class="pull-right">{{ customer_plus.tbcdateenteredprog|date:"DATE_FORMAT" }}</span>
+                </li>
+                {% endif %}
+                <li class="list-group-item">
+                  <strong>Price Code</strong>
+                  <span class="pull-right">{{ object.get_pricecode_display }}</span>
+                </li>
+                <li class="list-group-item">
+                  <strong>Include Add-On Items</strong>
+                  <span class="pull-right">{{ customer_plus.includeaddonitems }}</span>
+                </li>
+                <li class="list-group-item">
+                  <strong>Include in Physical Mailings</strong>
+                  <span class="pull-right">{{ customer_plus.includeinphysical }}</span>
+                </li>
+                <li class="list-group-item">
+                  <strong>Order Insert Preferences</strong>
+                  <span class="pull-right">{{ customer_plus.orderinsertprefere }}</span>
+                </li>
+              </ul>
+          <div class="row">
+            <div class="col-lg-12">
+
+            </div>
+          </div>
+      </div>
+    </div>
+
+    <div class="col-lg-7">
+      <div class="panel panel-default">
+        <div class="panel-heading">Contact Details</div>
+        <div class="panel-body">
+          <div class="row">
+            <div class="col-lg-12">
+              <ul class="list-group">
+                <li class="list-group-item">
+                  <strong>Email</strong>
+                  <span class="pull-right">{{ object.email|urlize }}</span>
+                </li>
+                {% if customer_plus.shippingemailifdif|length > 1 %}
+                <li class="list-group-item">
+                  <strong>Shipping Email</strong>
+                  <span class="pull-right">{{ customer_plus.shippingemailifdif|urlize }}</span>
+                </li>
+                {% endif %}
+                <li class="list-group-item">
+                  <strong>Telephone</strong>
+                  <span class="pull-right">{{ object.telephone }}</span>
+                </li>
+                {% if customer_plus.alternatecontact|length > 1 %}
+                <li class="list-group-item">
+                  <strong>Alternate Contact</strong>
+                  <span class="pull-right">{{ customer_plus.alternatecontact }}</span>
+                </li>
+                {% endif %}
+                {% if object.addtelephone|length > 1 %}
+                <li class="list-group-item">
+                  <strong>Additional Telephone</strong>
+                  <span class="pull-right">{{ object.addtelephone }}</span>
+                </li>
+                {% endif %}
+              </ul>
+            </div>
+            
+          </div>
+          <div class="row">
+            <div class="col-lg-6">
+              <div class="panel panel-default">
+                <div class="panel-heading">Billing Address
+                  <span class="pull-right">
+                    <a href="#bill_weather_tab" class="btn btn-default" aria-controls="bill_weather_tab" role="tab" data-toggle="tab"><span class="glyphicon glyphicon-cloud" aria-hidden="true"></span></a>
+                  </span>
+                  <span class="pull-right">
+                    <a href="#bill_map_tab" class="btn btn-default" aria-controls="bill_map_tab" role="tab" data-toggle="tab"><span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span></a>
+                  </span>
+                  <span class="pull-right">
+                    <a href="#bill_address_tab" class="btn btn-default" aria-controls="bill_address_tab" role="tab" data-toggle="tab"><span class="glyphicon glyphicon-th-list" aria-hidden="true"></span></a>
+                  </span>
+                </div>
+                <ul class="list-group">
+                  <div class="tab-content">
+                    <div id="bill_address_tab" class="tab-pane active">
+                      <li class="list-group-item">
+                        <strong>Name</strong>
+                        <span class="pull-right">{{ object.soldtoaddr1 }}</span>
+                      </li>
+                      {% if object.soldtoaddr2|length > 1 %}
+                      <li class="list-group-item">
+                        <strong>Name 2</strong>
+                        <span class="pull-right">{{ object.soldtoaddr2 }}</span>
+                      </li>
+                      {% endif %}
+                      <li class="list-group-item">
+                        <strong>Address</strong>
+                        <span class="pull-right">{{ object.soldtoaddr3 }}</span>
+                      </li>
+                      {% if object.soldtoaddr4|length > 1 %}
+                      <li class="list-group-item">
+                        <strong>Address 2</strong>
+                        <span class="pull-right">{{ object.soldtoaddr4 }}</span>
+                      </li>
+                      {% endif %}
+                      <li class="list-group-item">
+                        <strong>City, State</strong>
+                        <span class="pull-right">{{ object.soldtoaddr5 }}</span>
+                      </li>
+                      <li class="list-group-item">
+                        <strong>Zip</strong>
+                        <span class="pull-right">{{ object.soldpostalcode }}</span>
+                      </li>
+                    </div>
+                    <div id="bill_map_tab" class="tab-pane" role="tabpanel">
+                      <li class="list-group-item">
+                        <iframe 
+                          width="100%"
+                          height="300" 
+                          frameborder="0" style="border:0"
+                          src="https://www.google.com/maps/embed/v1/search?key=AIzaSyApQPtPDsunvZhbNhdHAxm83d5ciRW8sbI&q={{ object.soldtoaddr3.split|join:'+'|cut:'#' }}+{{ object.soldtoaddr4.split|join:'+'|cut:'#' }}+{{ object.soldtoaddr5.split|join:'+' }}"></iframe>
+                      </li>
+                    </div>
+                    <div id="bill_weather_tab" class="tab-pane weather-tab" role="tabpanel">
+                      <li class="list-group-item media">
+                        <p><strong>{{ bill_weather.current_conditions.station }}</strong></p>
+                        <div class="media-left"><div class="well"><img src="{% static 'syspro_web/img/weather/' %}{{bill_weather.current_conditions.text|default:'blank'|cut:"/"}}.png"></div></div>
+                        <div class="media-body">
+                          <p>{{ bill_weather.current_conditions.text }}</p>
+                          <span>Temp: {{ bill_weather.current_conditions.temperature }} °F</span>
+                        </div>
+                      </li>
+                    </div>
+                  </div>
+                </ul>
+              </div>
+            </div>
+
+            <div class="col-lg-6">
+              <div class="panel panel-default">
+                <div class="panel-heading">Shipping Address
+                  <span class="pull-right">
+                    <a href="#ship_weather_tab" class="btn btn-default" aria-controls="ship_weather_tab" role="tab" data-toggle="tab"><span class="glyphicon glyphicon-cloud" aria-hidden="true"></span></a>
+                  </span>
+                  <span class="pull-right">
+                    <a href="#ship_map_tab" class="btn btn-default" aria-controls="ship_map_tab" role="tab" data-toggle="tab"><span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span></a>
+                  </span>
+                  <span class="pull-right">
+                    <a href="#ship_address_tab" class="btn btn-default" aria-controls="ship_address_tab" role="tab" data-toggle="tab"><span class="glyphicon glyphicon-th-list" aria-hidden="true"></span></a>
+                  </span>
+                </div>
+                <ul class="list-group">
+                  <div class="tab-content">
+                    <div id="ship_address_tab" class="tab-pane active" role="tabpanel">
+                      <li class="list-group-item">
+                        <strong>Name</strong>
+                        <span class="pull-right">{{ object.shiptoaddr1 }}</span>
+                      </li>
+                      {% if object.shiptoaddr2|length > 1 %}
+                      <li class="list-group-item">
+                        <strong>Name 2</strong>
+                        <span class="pull-right">{{ object.shiptoaddr2 }}</span>
+                      </li>
+                      {% endif %}
+                      <li class="list-group-item">
+                        <strong>Address</strong>
+                        <span class="pull-right">{{ object.shiptoaddr3 }}</span>
+                      </li>
+                      {% if object.shiptoaddr4|length > 1 %}
+                      <li class="list-group-item">
+                        <strong>Address 2</strong>
+                        <span class="pull-right">{{ object.shiptoaddr4 }}</span>
+                      </li>
+                      {% endif %}
+                      <li class="list-group-item">
+                        <strong>City, State</strong>
+                        <span class="pull-right">{{ object.shiptoaddr5 }}</span>
+                      </li>
+                      <li class="list-group-item">
+                        <strong>Zip</strong>
+                        <span class="pull-right">{{ object.shippostalcode }}</span>
+                      </li>
+                    </div>
+                    <div id="ship_map_tab" class="tab-pane" role="tabpanel">
+                      <li class="list-group-item">
+                        <iframe 
+                          width="100%"
+                          height="300" 
+                          frameborder="0" style="border:0"
+                          src="https://www.google.com/maps/embed/v1/search?key=AIzaSyApQPtPDsunvZhbNhdHAxm83d5ciRW8sbI&q={{ object.shiptoaddr3.split|join:'+'|cut:'#' }}+{{ object.shiptoaddr4.split|join:'+'|cut:'#' }}+{{ object.shiptoaddr5.split|join:'+' }}"></iframe>
+                      </li>
+                    </div>
+                    <div id="ship_weather_tab" class="tab-pane weather-tab" role="tabpanel">
+                      <li class="list-group-item media">
+                        <p><strong>{{ ship_weather.current_conditions.station }}</strong></p>
+                        <div class="media-left"><div class="well"><img src="{% static 'syspro_web/img/weather/' %}{{ship_weather.current_conditions.text|default:'blank'|cut:"/"}}.png"></div></div>
+                        <div class="media-body">
+                          <p>{{ ship_weather.current_conditions.text }}</p>
+                          <span>Temp: {{ ship_weather.current_conditions.temperature }} °F</span>
+                        </div>
+                      </li>
+                    </div>
+                  </div>
+                </ul>
+
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    {% if recent_orders|length > 0 %}
+    <div class="col-lg-12">
+      <div class="panel panel-default">
+        <div class="panel-heading">Recent Orders</div>
+          {% render_table orders_table %}
+      </div>
+    </div>
+    {% endif %}
+    {% if reprint_orders|length > 0 %}
+    <div class="col-lg-12">
+      <div class="panel panel-default">
+        <div class="panel-heading">Past Orders</div>
+          {% render_table reprint_table %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</body>
+
+{% endblock %}
+</html>

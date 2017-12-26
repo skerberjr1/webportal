@@ -1,0 +1,29 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<html>
+  <body>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Sales Order</th>
+          <th>Customer PO Number</th>
+          <th>Customer</th>
+          <th>Order Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for order in orders %}
+          <tr>
+            <td><a href="/orders/{{ order.SalesOrder }}/">{{ order.SalesOrder }}</a></td>
+            <td>{{ order.CustomerPoNumber }}</td>
+            <td>{{ order.Customer }}</td>
+            <td>{{ order.EntInvoiceDate|date }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>  
+  </body>
+</html>

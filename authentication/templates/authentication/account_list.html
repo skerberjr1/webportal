@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+  {% block content %}
+    <body>
+      <div class="row">
+
+        <div id="user_detail_placeholder"></div>
+
+        <div class="col-xs-12 col-sm-12 col-md-6">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              Users
+            </div>
+            <table class="table table-responsive">
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+              </tr>
+            {% for account in object_list %}
+              <tr>
+                <td><a href="#" class="account_link" id="{{ account.id }}">{{ account.get_full_name }}</a></td>
+                <td>{{ account.email }}</td>
+              </tr>
+            {% endfor %}
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <script type="text/javascript">
+        $(document).ready(function() {
+          $('.account_link').on('click', function(event) {
+            $('#user_detail_placeholder').load('/authentication/list/' + this.id, function() {
+              $().css('background-color');
+            });
+          });
+        });
+      </script>
+    </body>
+  {% endblock %}
+</html>

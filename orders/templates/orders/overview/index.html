@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+{% block navbar_class-overview %}active{% endblock %}
+
+{% block content %}
+<head>
+  <link href="{% static 'orders/css/datepicker.css' %}" rel="stylesheet">
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/js/bootstrap-datepicker.js"></script>
+</head>
+
+<body ng-app="tableCsv">
+  <div class="row container-fluid">
+    <div class="jumbotron">
+      <h2>Customer Sales Orders</h2>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-12">
+      <div class="alert alert-info" role="alert">
+        <b>Note:</b> Does not include Amazon FBA orders (order designation 'AF') or Amazon Warehouse Transfers. <a href="/orders/warehouse_orders" class="alert-link">Warehouse Transfers are listed here.</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-5 not-hidden" id="status_panel_col">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <div class="row">
+            <div class="col-sm-12">
+              <h3 class="panel-title panel-heading-padfix">
+                <button class="btn btn-default" id="status_refresh">
+                  <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
+                </button>
+                Orders by Current Status
+              </h3>
+            </div>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="not-hidden overview-chart" id="status_chart"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-7" id="hour_panel_col">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <div class="row">
+            <div class="col-md-4">
+              <h3 class="panel-title panel-heading-padfix">
+                <button class="btn btn-default" id="hour_refresh">
+                  <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
+                </button>
+                Orders by Hour
+              </h3>
+            </div>
+            <div class="col-md-7">
+              <div class="col-sm-4">
+                <label for="begin_date" class="heading-label">Begin Date</label>
+                <input class="dateinput form-control panel-heading-input" id="begin_date" type="text">
+              </div>
+              <div class="col-sm-4">
+                <label for="end_date" class="heading-label">End Date</label>
+                <input class="dateinput form-control panel-heading-input" id="end_date" type="text">
+              </div>
+              <div class="col-sm-4">
+                <label for="interval" class="heading-label">Interval</label>
+                <select class="form-control panel-heading-input" id="interval">
+                  <option value="hour">Hour</option>
+                  <option value="day">Day</option>
+                  <option value="week">Week</option>
+                  <option value="month">Month</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-1">
+              <button class="btn btn-default pull-right" id="hour_expand">
+                <span class="glyphicon glyphicon-resize-full" aria-hidden="true" id="hour_expand_glyph"></span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="col-sm-12 overview-chart" id="hour_chart"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-5" id="status_table_col">
+      <div class="panel panel-default" ng-controller="sampleController">
+        <div class="panel-heading">
+          <span id="status_panel_heading">Select a bar from above to show orders</span>
+          <button export-to-csv id="status_export_button" class="btn btn-default pull-right"><span class="glyphicon glyphicon-file"></span> Export</button>
+        </div>
+        <div id="status_table_placeholder"></div>
+      </div>
+    </div>
+    <div class="col-lg-7" id="hour_table_col">
+      <div class="panel panel-default" ng-controller="sampleController">
+        <div class="panel-heading">
+          <span id="hour_panel_heading">Select a column from above to show orders</span>
+          <button export-to-csv id="hour_export_button" class="btn btn-default pull-right"><span class="glyphicon glyphicon-file"></span> Export</button>
+        </div>
+        <div id="hour_table_placeholder"></div>
+      </div>
+    </div>
+  </div>
+
+
+  <script>
+    var begin_date
+    var end_date
+    var interval
+
+    $(document).ready(function() {
+      var today = new Date();
+      $('.dateinput').datepicker();
+      $('.dateinput').datepicker('update', today.toLocaleString());  
+
+      function loadHourChart() {
+        begin_date = $('#begin_date').val().replace('/', '.').replace('/', '.');
+        end_date = $('#end_date').val().replace('/', '.').replace('/', '.');
+        interval = $('#interval').val()
+        $('#hour_chart').load('/orders/charts/hour_chart?begin_date=' + begin_date + '&end_date=' + end_date + '&interval=' + interval);
+        $('#hour_table_placeholder').html('<div></div>');
+        $('#hour_panel_heading').text('Select a column from above to show orders');
+      };
+
+      function loadStatusChart() {
+        $('#status_chart').load('/orders/charts/status_chart');
+        $('#status_table_placeholder').html('<div></div>');
+        $('#status_panel_heading').text('Select a bar from above to show orders');
+      };
+
+      loadHourChart();
+      loadStatusChart();
+
+      $('.dateinput').datepicker().on('changeDate', function() {loadHourChart()});
+      $('.form-control').change(function() {loadHourChart()});
+      $('#status_refresh').click(function() {loadStatusChart()});
+      $('#hour_refresh').click(function() {loadHourChart()});
+
+        //create trigger to resizeEnd event     
+        $(window).resize(function() {
+          if(this.resizeTO) clearTimeout(this.resizeTO);
+          this.resizeTO = setTimeout(function() {
+            $(this).trigger('resizeEnd');
+          }, 500);
+        });
+
+        $(window).on('resizeEnd', function() {
+          $('#status_chart').load('/orders/charts/status_chart');
+          $('#hour_chart').load('/orders/charts/hour_chart?begin_date=' + begin_date + '&end_date=' + end_date + '&interval=' + interval); 
+        });
+
+        $('#hour_expand').on('click', function() {
+          $('#hour_panel_col').toggleClass('col-lg-7 col-lg-12');
+          $('#hour_table_col').toggleClass('col-lg-7 col-lg-12');
+          $('#status_panel_col').toggleClass('not-hidden hidden');
+          $('#status_table_col').toggleClass('not-hidden hidden');
+          $('#hour_chart').toggleClass('overview-chart overview-chart-expanded');
+          $('#hour_expand_glyph').toggleClass('glyphicon-resize-full glyphicon-resize-small');
+          loadHourChart();
+        });
+      }); 
+  </script>
+
+
+</body>
+{% endblock %}
+
+</html>

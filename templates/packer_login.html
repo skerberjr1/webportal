@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block content %}
+<body>
+{% if form.errors %}
+<p>Your packer ID was incorrect. Please try again.</p>
+{% endif %}
+
+{% if next %}
+    {% if user.is_authenticated %}
+    <p>Your account doesn't have access to this page. To proceed,
+    please login with an account that has access.</p>
+    {% else %}
+    <p>Please login to see this page.</p>
+    {% endif %}
+{% endif %}
+
+<form method="post" action="{% url 'packer_login' %}">
+{% csrf_token %}
+<table>
+<tr>
+    <td><input id="id_username" maxlength="254" name="username" value= 'a' type="hidden"></td>
+</tr>
+<tr>
+    <td><label for="id_password" style="padding-right: 20px">Packer ID:</label></td>
+    <td>{{ form.password }}</td>
+</tr>
+</table>
+
+<input type="submit" value="login" />
+<input type="hidden" name="next" value="/orders/packer_overview?packer=true" />
+</form>
+
+
+
+</body>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('#id_password').focus();
+
+    });
+</script>
+{% endblock %}

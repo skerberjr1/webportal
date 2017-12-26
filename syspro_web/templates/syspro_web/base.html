@@ -1,0 +1,128 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Bootstrap core CSS -->
+  <link href="{% static 'bootstrap/dist/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'admin2/dist/css/sb-admin-2.css' %}" rel="stylesheet">
+  <link href="{% static 'admin2/vendor/metisMenu/metisMenu.css' %}" rel="stylesheet">
+  <link href="{% static 'admin2/vendor/morrisjs/morris.css' %}" rel="stylesheet">
+  <link href="{% static 'admin2/vendor/font-awesome/css/font-awesome.min.css' %}" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'django_tables2/themes/paleblue/css/screen.css' %}" />
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.3/jquery-ui.css" type="text/css" media="all" />
+  <link href="{% static 'syspro_web/css/style.css' %}" rel="stylesheet">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.17.1/moment.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular-route.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular-resource.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js"></script>
+</head>
+
+<body>
+  <div id="wrapper">
+    <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span ><a href="/logout">Logout</a></span>
+        </button>
+        <a class="navbar-brand" href="/syspro_web/">Syspro Web Interface</a>
+      </div>
+      <!-- /.navbar-header -->
+      <ul class="nav navbar-top-links navbar-right">
+        <li><a href="/syspro_web/logout">Logout</a></li>
+      </ul>
+      <!-- /.navbar-top-links -->
+
+      <div class="navbar-default sidebar" role="navigation">
+        <div class="sidebar-nav navbar-collapse">
+          <div class="col-lg-12">
+            <div class="form-group input-group">
+              <input id="customer_search" type="text" class="form-control autocomplete" placeholder="Customer Search...">
+              <span class="input-group-btn">
+                <button id="customer_search_button" class="btn btn-default" type="button">
+                  <i class="fa fa-search"></i>
+                </button>
+              </span>
+            </div>
+            <label for="customer_search"><a href="/syspro_web/customer/advanced_search" class="animated-link">Advanced Search</a></label>
+            <div class="form-group input-group">
+              <input id="order_search" type="text" class="form-control autocomplete" placeholder="Order Search...">
+              <span class="input-group-btn">
+                <button id="order_search_button" class="btn btn-default" type="button">
+                  <i class="fa fa-search"></i>
+                </button>
+              </span>
+            </div>
+            <label for="order_search"><a href="/syspro_web/order/advanced_search" class="animated-link">Advanced Search</a></label>
+            <ul class="nav in" id="side-menu">
+            </ul>
+          </div>
+        </div>
+        <!-- /.sidebar-collapse -->
+      </div>
+      <!-- /.navbar-static-side -->
+    </nav>
+  </div>
+
+  <div id="page-wrapper" style="min-height: 899px;">
+    {% block content %}
+    {% endblock %}
+  </div>
+
+  <script src="{% static 'bootstrap/dist/js/bootstrap.min.js' %}"></script>
+  <script src="{% static 'bootstrap/dist/js/bootstrap-sortable.js' %}"></script>
+  <script src="{% static 'bootstrap/dist/js/moment.min.js' %}"></script>
+  <script src="{% static 'admin2/js/sb-admin-2.js' %}"></script>
+  <script src="{% static 'admin2/vendor/metisMenu/metisMenu.js' %}"></script>
+  <script src="{% static 'admin2/vendor/morrisjs/morris.js' %}"></script>
+  <script src="{% static 'orders/js/app.js' %}"></script>
+  <script src="{% static 'orders/js/controllers/main_controller.js' %}"></script>
+  <script src="{% static 'orders/js/directives/export_to_csv.js' %}"></script>
+  <script src="{% static 'syspro_web/js/clickable_rows.js' %}"></script>
+
+  <script>
+    $(function () {
+      $('#customer_search').autocomplete({
+        source: "/syspro_web/customer/search",
+        minLength: 2,
+        select: function( event, ui ) {
+          window.location.href = "/syspro_web/customer/" + ui.item.id;
+        }
+      });
+    });
+    $(function () {
+      $('#order_search').autocomplete({
+        source: "/syspro_web/order/search",
+        minLength: 4,
+        select: function( event, ui ) {
+          window.location.href = "/syspro_web/order/" + ui.item.id;
+        }
+      });
+    })
+    $('#customer_search_button').on('click', function(event) {
+      var search = $('#customer_search').val()
+      window.location.href = "/syspro_web/customer/search/results?search=" + search
+    });
+    $('#order_search_button').on('click', function(event) {
+      var search = $('#order_search').val()
+      window.location.href = "/syspro_web/order/search/results?search=" + search
+    });
+    $("#customer_search").keyup(function(event){
+      if(event.keyCode == 13){
+        $("#customer_search_button").click();
+      }
+    });
+    $("#order_search").keyup(function(event){
+      if(event.keyCode == 13){
+        $("#order_search_button").click();
+      }
+    });
+  </script>
+</body>
+</html>

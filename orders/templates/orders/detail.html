@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+
+  {% block content %}
+    <body>
+      {% if sales_order %}
+        <div class="row container-fluid">
+          <div class="jumbotron">
+            <div class="page-header">
+              <h2>Sales Order <strong>{{ sales_order.SalesOrder }}</strong></h2>
+            </div>
+            <hr>
+            {% if sales_order.CustomerPoNumber %}
+              <h3>Customer PO <strong>{{ sales_order.CustomerPoNumber }}</strong></h3>
+            {% endif %}
+            <h3>
+              Status <strong>{{ sales_order.OrderStatus }}</strong>
+              <span class="pull-right">Order Date <strong>{{ sales_order.OrderDateShort }}</strong></span>
+            </h3>
+          </div>
+        </div>
+
+        <div class="row">
+
+          <!-- Customer Info Panel -->
+          <div class="col-lg-7">
+            <div class="panel panel-default" >
+              <div class="panel-heading">
+                <span class="glyphicon glyphicon-user" aria-hidden="true"></span> Customer Info
+              </div>
+
+              <div class="panel-body">
+                <div class="list-group">
+                  <li class="list-group-item">
+                    <strong>Customer Name</strong>
+                    <span class="pull-right">{{ sales_order.CustomerName}}</span>
+                  </li>
+                  <li class="list-group-item">
+                    <strong>Telephone Number</strong>
+                    <span class="pull-right">{{ sales_order.Telephone}}</span>
+                  </li>
+                  <li class="list-group-item">
+                    <strong>Email</strong>
+                    <span class="pull-right">{{ sales_order.Email}}</span>
+                  </li>
+                  <li class="list-group-item list-group-item-warning">
+                    <strong>Customer Alert</strong>
+                    <span class="pull-right">{{ sales_order.CustomerAlert}}</span>
+                  </li>
+                </div>
+
+                <div class="row">
+                  <div class="col-lg-6">
+                    <div class="panel panel-default">
+                      <div class="panel-heading" style="font-size: 16px">Billing Address</div>
+                      <ul class="list-group">
+                        <li class="list-group-item">
+                          <strong>Name</strong>
+                          <span class="pull-right">{{ sales_order.SoldToAddr1 }}</span>
+                        </li>
+                        {% if sales_order.SoldToAddr2 != "" %}
+                          <li class="list-group-item">
+                            <strong>Name 2</strong>
+                            <span class="pull-right">{{ sales_order.SoldToAddr2 }}</span>
+                          </li>
+                        {% endif %}
+                        <li class="list-group-item">
+                          <strong>Address</strong>
+                          <span class="pull-right">{{ sales_order.SoldToAddr3 }}</span>
+                        </li>
+                        {% if sales_order.SoldToAddr4 != "" %}
+                          <li class="list-group-item">
+                            <strong>Address 2</strong>
+                            <span class="pull-right">{{ sales_order.SoldToAddr4 }}</span>
+                          </li>
+                        {% endif %}
+                        <li class="list-group-item">
+                          <strong>City, State</strong>
+                          <span class="pull-right">{{ sales_order.SoldToAddr5 }}</span>
+                        </li>
+                        <li class="list-group-item">
+                          <strong>Zip</strong>
+                          <span class="pull-right">{{ sales_order.SoldPostalCode }}</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div class="col-lg-6">
+                    <div class="panel panel-default">
+                      <div class="panel-heading" style="font-size: 16px">Shipping Address</div>
+                      <ul class="list-group">
+                        <li class="list-group-item">
+                          <strong>Name</strong>
+                          <span class="pull-right">{{ sales_order.ShipAddress1 }}</span>
+                        </li>
+                        {% if sales_order.ShipAddress2 != "" %}
+                          <li class="list-group-item">
+                            <strong>Name 2</strong>
+                            <span class="pull-right">{{ sales_order.ShipAddress2 }}</span>
+                          </li>
+                        {% endif %}
+                        <li class="list-group-item">
+                          <strong>Address</strong>
+                          <span class="pull-right">{{ sales_order.ShipAddress3 }}</span>
+                        </li>
+                        {% if sales_order.ShipAddress4 != "" %}
+                          <li class="list-group-item">
+                            <strong>Address 2</strong>
+                            <span class="pull-right">{{ sales_order.ShipAddress4 }}</span>
+                          </li>
+                        {% endif %}
+                        <li class="list-group-item">
+                          <strong>City, State</strong>
+                          <span class="pull-right">{{ sales_order.ShipAddress5 }}</span>
+                        </li>
+                        <li class="list-group-item">
+                          <strong>Zip</strong>
+                          <span class="pull-right">{{ sales_order.ShipPostalCode }}</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- /Customer Info Panel -->
+
+          <!-- Order Info Panel -->
+          <div class="col-lg-5">
+            <div class="panel panel-default">
+              <div class="panel-heading">
+                <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span> Order Info
+              </div>
+              <div class="panel-body">
+                <ul class="list-group">
+                  <li class="list-group-item">
+                    <strong>Order Time</strong>
+                    <span class="pull-right">{{ sales_order.OrderTime }}</span>
+                  </li>
+                  <li class="list-group-item">
+                    <strong>Salesperson</strong>
+                    <span class="pull-right">{{ sales_order.Salesperson }}</span>
+                  </li>
+                  <li class="list-group-item">
+                    <strong>Last Operator</strong>
+                    <span class="pull-right">{{ sales_order.LastOperator }}</span>
+                  </li>
+                  <li class="list-group-item">
+                    <strong>Shipping Instructions</strong>
+                    <span class="pull-right">{{ sales_order.ShippingInstrs }}</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+            <!-- /Order Info Panel -->
+
+        </div>
+
+        <!-- Line Details -->
+        <div class="row">
+          <div class="col-lg-12">
+            <div class="panel panel-default">
+              <div class="panel-heading">
+                <span class="glyphicon glyphicon-shopping-cart" aria-hidden="true"></span> Line Items
+              </div>
+              <div class="panel-body">
+                <div class="table-responsive">
+                  <table class="table">
+                    <thead>
+                      <tr>
+                        <th>Line</th>
+                        <th>Stock Code</th>
+                        <th>Description</th>
+                        <th>Price</th>
+                        <th>Order Quantity</th>
+                        <th>Ship Quantity</th>
+                        <th>Ship Date</th>
+                        <th>Backorder Quantity</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for line in sales_order_detail %}
+                        <tr>
+                          <td>{{ line.SalesOrderLine }}</td>
+                          <td>{{ line.MStockCode }}</td>
+                          <td>{{ line.FullDescription }}</td>
+                          <td>{{ line.MPrice }}</td>
+                          <td>{{ line.MOrderQty }}</td>
+                          <td>{{ line.MShipQty }}</td>
+                          <td>{{ line.MLineShipDate|date:'M. jS, Y' }}</td>
+                          <td>{{ line.MBackOrderQty }}</td>
+                        </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- /Line Details -->
+
+      {% else %}
+        <h2>Sales Order does not exist</h2>
+      {% endif %}
+          
+    </body>
+  {% endblock %}
+
+</html>

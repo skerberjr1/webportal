@@ -1,0 +1,41 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+{% block table %}
+<html>
+  <head>
+    <script type="text/javascript">
+      $(document).ready(function() {
+        $('#transfers_table').tablesorter();
+      });
+    </script>
+  </head>
+
+  <body>
+    <table class="table table-responsive" id="transfers_table">
+      <thead>
+        <tr>
+          <th>Sales Order</th>
+          <th>SKU</th>
+          <th>Qty</th>
+          <th>Weight</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for order in transfer_orders %}
+          <tr>
+            <td>{{ order.SalesOrder }}</td>
+            <td>{{ order.Sku }}</td>
+            <td>{{ order.Qty }}</td>
+            <td>{{ order.Weight }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    
+  </body>
+{% endblock %}
+</html>

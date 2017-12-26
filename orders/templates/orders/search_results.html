@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+  {% block navbar_class-search %}active{% endblock %}
+
+  {% block content %}
+
+  <head>
+    <script>
+      $(document).ready(function(){
+        $("#back").click(function () {
+          parent.history.back();
+          return false;
+        });
+      });
+    </script>
+  </head>
+
+  <body ng-app="tableCsv" ng-controller="sampleController">
+    <div class="page-header">
+      <h1>Search Results</h1>
+    </div>
+    <div class="row">
+      <a id="back" href="/orders/order_search/">Back to Order Search</a>
+      <span><button export-to-csv class="btn btn-default pull-right"><span class="glyphicon glyphicon-file"></span> Export</button></span>
+    </div>
+    <p></p>
+    <div class="row">
+      <div class="table-responsive">
+        <table class="table table-striped sortable">
+          <thead>
+            <tr>
+              <th data-defaultsort="asc">Sales Order</th>
+              <th>Order Status</th>
+              <th data-dateformat="MMM-D-YYYY hh:mm a">Order Date</th>
+              <th data-dateformat="MMM-D-YYYY hh:mm a">Last Print Date</th>
+              <th>Order Type</th>
+              <th>Salesperson</th>
+              <th>Ship Via</th>
+              <th>Customer</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for order in search_results %}
+              <tr>
+                <td><a href="/orders/{{ order.SalesOrder }}/">{{ order.SalesOrder }}</a></td>
+                <td>{{ order.OrderStatus }}</td>
+                <td data-dateformat="MMM-D-YYYY hh:mm a">{{ order.OrderDateTime }}</td>
+                <td data-dateformat="MMM-D-YYYY hh:mm a">{{ order.DelNoteDateTime }}</td>
+                <td>{{ order.OrderType }}</td>
+                <td>{{ order.Salesperson }}</td>
+                <td>{{ order.ShipVia }}</td>
+                <td>{{ order.Customer }} - {{ order.CustomerName }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </body>
+  {% endblock %}
+</html>

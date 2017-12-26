@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html lang="en">
+  
+  {% block navbar_class-warehouse_orders %}active{% endblock %}
+
+  {% block content %}
+  <head>
+    <link href="{% static 'orders/css/datepicker.css' %}" rel="stylesheet">
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/js/bootstrap-datepicker.js"></script>
+    <script src="{% static 'orders/js/tablesorter/jquery.tablesorter.js' %}"></script>
+  </head>
+
+  <body ng-app="tableCsv" ng-controller="sampleController">
+    <div class="page-header">
+      <h1>Warehouse Transfer Orders</h1>
+    </div>
+
+    <div class="col-lg-10">
+
+      <div class="row">
+        <div class="col-md-6">
+          <div class="panel panel-default">
+            <div class="panel-heading">Transfer Orders by Status</div>
+            <div class="panel-body">
+              <div id="chart"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-12">
+          <div class="panel panel-default">
+            <div class="panel-heading">Transfer Orders by Date</div>
+            <div class="panel-body">
+              <div class="row">
+                <div class="col-md-3">
+                  <div class="form-group">
+                    <label for="begin_date">Begin Date</label>
+                    <input class="dateinput dateinput-lg form-control fba-param" id="begin_date" type="text">
+                    <label for="end_date">End Date</label>
+                    <input class="dateinput dateinput-lg form-control fba-param" id="end_date" label="End Date" type="text">
+                    <label for="interval">Interval</label>
+                    <select class="form-control fba-param" id="interval">
+                      <option>Day</option>
+                      <option>Week</option>
+                      <option>Month</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-md-9">
+                  <div id="transfers_chart"></div>
+                </div>
+              </div>
+            </div>
+            <div id="transfers_table">{% block table %}{% endblock %}</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h3>Status 4 Transfer Orders
+                <button export-to-csv class="btn btn-default pull-right"><span class="glyphicon glyphicon-file"></span> Export</button>
+              </h3>
+            </div>
+
+            <div class="panel-body">
+              <div class="col-md-4">
+                <div class="well pull-left">
+                  <label for="toggle_fillable">Check to hide unfillable orders</label>
+                  <input type="checkbox" id="toggle_fillable">
+                </div>
+              </div>
+            </div>
+              
+            <table class="table sortable table-responsive">
+              <thead>
+                <tr>
+                  <th data-defaultsort="asc">Sales Order</th>
+                  <th>Order Status</th>
+                  <th data-dateformat="MMM-D-YYYY hh:mm a">Order Date</th>
+                  <th>SKU</th>
+                  <th>Qty Ordered</th>
+                  <th>Qty On Hand</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for order in warehouse_orders %}
+                  <tr>
+                    <td><a href="/orders/{{ order.SalesOrder }}/">{{ order.SalesOrder }}</a></td>
+                    <td>{{ order.OrderStatus }}</td>
+                    <td data-dateformat="MMM-D-YYYY hh:mm a">{{ order.OrderDateTime }}</td>
+                    <td>{{ order.MStockCode }}</td>
+                    <td>{{ order.MOrderQty }}</td>
+                    <td>{{ order.QtyOnHandConv }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+                
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <script>
+      $(document).ready(function() {
+        var today = new Date();
+        var begin = new Date();
+        begin.setDate(begin.getDate() - 14);
+
+        $('#begin_date').val(begin.toLocaleDateString());
+        $('#end_date').val(today.toLocaleDateString());
+        $('.dateinput').datepicker({ format: "m/d/yyyy" });
+
+        function loadChart() {
+          var url = '/orders/warehouse_orders/transfers_chart/'
+          url += $('#begin_date').val().replace('/', '.').replace('/', '.') + '/'
+          url += $('#end_date').val().replace('/', '.').replace('/', '.') + '/'
+          url += $('#interval').val()
+          $('#transfers_chart').load(url);
+        };
+
+        loadChart();
+
+        $('.dateinput').datepicker()
+          .on('changeDate', function (e) {
+            loadChart();
+          });
+        $('.fba-param').change(function() {
+          loadChart();
+        });
+
+        $('#chart').load('/orders/warehouse_orders/chart');
+      });
+
+      $('table > tbody  > tr').each(function(){
+        var order_qty = Number($(this).children().eq(4).text());
+        var on_hand_qty = Number($(this).children().eq(5).text());
+        if (order_qty > on_hand_qty){
+          $(this).children().eq(4).wrapInner('<strong></strong>');
+          $(this).children().eq(4).css({'color': 'red'});
+          $(this).addClass('unfillable');
+        }
+      });
+
+      $('#toggle_fillable').click(function() {
+        if ($('#toggle_fillable:checked').length > 0) {
+          $('.unfillable').hide();
+        } else {
+          $('.unfillable').show();
+        }
+      });
+
+      $('#transfers_table').on
+    </script>
+
+  </body>
+  {% endblock %}
+</html>

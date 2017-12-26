@@ -1,0 +1,116 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<html>
+  <head>
+    
+    <script type="text/javascript">
+
+      // Load the Visualization API and the corechart package.
+      google.charts.load('visualization', {'packages':['corechart', 'bar']});
+
+      // Set a callback to run when the Google Visualization API is loaded.
+      // google.charts.setOnLoadCallback(drawPieChart);
+      google.charts.setOnLoadCallback(drawPackerChart);
+
+      var packerData;
+      var packerChart;
+
+      function drawPackerChart() {
+
+        var total_packs = 0;
+
+        //Create data table.
+        packerData = new google.visualization.DataTable();
+        packerData.addColumn('string', '');
+        {% for p in packers %}
+          packerData.addColumn('number', '{{ p.0 }}');
+        {% endfor %}
+        packerData.addColumn({type: 'number', role: 'annotation'})
+
+        {% for row in shipments %}
+          packerData.addRows([
+            [{% for value in row %}
+              {% if forloop.first %}'{{ value }}'{% if request.GET.interval == 'hour' and request.GET.begin_date == request.GET.end_date %}.slice(-8){% endif %},
+              {% else %}{{ value }},
+              {% endif %}
+            {% endfor %}]
+          ]);
+
+          {% for value in row %}
+            {% if forloop.first %}
+            {% elif forloop.last %}
+            {% else %}total_packs += {{ value }};
+            {% endif %}
+          {% endfor %}
+
+        {% endfor %}
+
+        //Chart options
+        var options = {
+          chart: {
+            title: '',
+            height: '100%',
+          },
+          backgroundColor: 'transparent',
+          series: {
+            0:{color:'#e53935'}, 1:{color:'#d81b60'}, 2:{color:'#5e35b1'}, 3:{color:'#3949ab'},
+            4:{color:'#1e88e5'}, 5:{color:'#039be5'}, 6:{color:'#00acc1'}, 7:{color:'#00897b'},
+            8:{color:'#43a047'}, 9:{color:'#7cb342'}, 10:{color:'#c0ca33'}, 11:{color:'#fdd835'},
+            12:{color:'#ffb300'}, 13:{color:'#fb8c00'}, 14:{color:'#f4511e'}, 15:{color:'#6d4c41'},
+          },
+          hAxis: {
+            title: null,
+            format: 'h:mm a',
+          },
+          legend: {
+            position: 'top',
+            maxLines: 2,
+          },
+          bars: 'vertical',
+          isStacked: true,
+          focusTarget: 'category',
+        };
+
+        packerChart = new google.charts.Bar(document.getElementById('packer_chart_div'));
+        packerChart.draw(packerData, google.charts.Bar.convertOptions(options));
+
+        $('#total_packs').text(total_packs.toLocaleString());
+
+        google.visualization.events.addListener(packerChart, 'select', selectCol);
+      }
+
+      function selectCol() {
+        var selection = packerChart.getSelection()[0];
+        if (typeof selection == "undefined" || selection.column == null) {
+          packerChart.setSelection();
+          return;
+        }
+        selectedPacker = packerData.getColumnLabel(selection.column)
+
+        $('#packer_chart').load(
+          '/orders/packer_overview/chart?begin_date=' + 
+          $('#begin_date').val().replace('/', '.').replace('/', '.') +
+          '&end_date=' +
+          $('#end_date').val().replace('/', '.').replace('/', '.') +
+          '&interval=' +
+          $('#interval').val() +
+          '&order_type=' +
+          $('#order_type').val() +
+          '&packer=' + selectedPacker +
+          '&shipment_pack=' +
+          $('#shipment_pack').val()
+        );
+      }
+    </script>
+  </head>
+
+  <body>
+    <div class="row">
+      <div id="packer_chart_div" style="height: 500px;"></div>
+      <h3>Total: <span id="total_packs"></span></h3>
+    </div>
+  </body>
+</html>

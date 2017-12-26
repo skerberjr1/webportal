@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+  {% block navbar_class-reports %}active{% endblock %}
+
+  {% block content %}
+  <body>
+    <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+      <h1 class="page-header">This is the index for Reports App</h1>
+      <div class="panel-group">
+        <div class="panel panel-primary filterable">
+          <div class="panel-heading">
+            <div class="panel-title"><a data-toggle="collapse" href="#fulfillment">Fulfillment Rate</a></div> 
+          </div>
+          <div id="fulfillment" class="panel-collapse collapse">
+            <div class="panel-body">
+              <div class="list-group">
+                {% for report in fulfillment_rate_reports %}
+                  <li class="list-group-item"><a href="/reports/{{report.id}}" target="_blank">{{ report.report_date }}</a></li>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+
+  {% endblock %}
+
+</html>

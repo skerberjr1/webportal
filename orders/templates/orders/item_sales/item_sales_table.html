@@ -1,0 +1,88 @@
+{% load staticfiles %}
+{% load humanize %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<html>
+  <head>
+  </head>
+
+  <body>
+    <div class="row">
+      <div class="col-md-4">
+        <div class="panel panel-default sku-sum-panel">
+          <div class="panel-heading">Top 20 by Qty</div>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>{{ group_name }}</th>
+                <th>Description</th>
+                <th>Qty</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for sku in list_qty_sold %}
+                <tr>
+                  <td>{{ sku.Item }}</td>
+                  <td>{{ sku.Description }}</td>
+                  <td>{{ sku.Qty|floatformat:-2|intcomma }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="panel panel-default sku-sum-panel">
+          <div class="panel-heading">Top 20 by # of Orders</div>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>{{ group_name }}</th>
+                <th>Description</th>
+                <th>Orders</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for sku in list_num_orders %}
+                <tr>
+                  <td>{{ sku.Item }}</td>
+                  <td>{{ sku.Description }}</td>
+                  <td>{{ sku.Qty|floatformat:-2|intcomma }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="panel panel-default sku-sum-panel">
+          <div class="panel-heading">Top 20 by Sales $</div>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>{{ group_name }}</th>
+                <th>Description</th>
+                <th>$</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for sku in list_sales_value %}
+                <tr>
+                  <td>{{ sku.Item }}</td>
+                  <td>{{ sku.Description }}</td>
+                  <td>{{ sku.Qty|floatformat:2|intcomma }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </body>
+
+</html>

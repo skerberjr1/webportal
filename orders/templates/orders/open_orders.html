@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html lang="en">
+  
+  {% block navbar_class-open_orders %}active{% endblock %}
+
+  {% block content %}
+  <head>
+    <link href="{% static 'orders/css/datepicker.css' %}" rel="stylesheet">
+    <script src="{% static 'orders/js/open_orders.js' %}"></script>
+  </head>
+
+  <body ng-app="tableCsv">
+    <h1 class="page-header">Open Sales Orders</h1>
+    <div class="panel panel-primary filterable">
+      <div class="panel-heading">
+        <h2 class="panel-title">Open Orders</h2>
+        <div class="pull-right" ng-controller="sampleController">
+          <button export-to-csv class="btn btn-default btn-xs"><span class="glyphicon glyphicon-file"></span> Export</button>
+          <button class="btn btn-default btn-xs btn-filter"><span class="glyphicon glyphicon-filter"></span> Filter</button>
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table id= "open-order-table" class="table table-striped sortable">
+          <thead>
+            <tr class="filters">
+              <th data-defaultsort="asc"><input type="text" class="form-control" placeholder="Sales Order" disabled></th>
+              <th><input type="text" class="form-control" placeholder="Order Status" disabled></th>
+              <th data-dateformat="MMM-D-YYYY hh:mm a"><input type="text" class="form-control" placeholder="Order Date" disabled></th>
+              <th data-dateformat="MMM-D-YYYY hh:mm a"><input type="text" class="form-control" placeholder="Last Print Date" disabled></th>
+              <th><input type="text" class="form-control" placeholder="Salesperson" disabled></th>
+              <th><input type="text" class="form-control" placeholder="Customer" disabled></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for order in open_orders %}
+              <tr>
+                <td><a href="/orders/{{ order.SalesOrder }}/">{{ order.SalesOrder }}</a></td>
+                <td>{{ order.OrderStatus }}</td>
+                <td class="date-field" data-dateformat="MMM-D-YYYY hh:mm a">{{ order.OrderDateTime }}</td>
+                <td class="date-field" data-dateformat="MMM-D-YYYY hh:mm a">{{ order.DelNoteDateTime }}</td>
+                <td>{{order.Salesperson}}</td>
+                <td>{{ order.Customer }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <script type="text/javascript">
+    </script>
+  </body>
+  {% endblock %}
+</html>
