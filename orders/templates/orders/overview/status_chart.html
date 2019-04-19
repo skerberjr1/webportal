@@ -22,11 +22,12 @@
         // Create the data table.
         barData = new google.visualization.DataTable();
         barData.addColumn('string', '');
-        barData.addColumn('number', 'Count');
+        barData.addColumn('number', 'Regular Orders');
+        barData.addColumn('number', 'Sample Orders');
 
         {% for status in orders %}
           barData.addRows([
-            ['{{ status.Status }}', {{ status.Cnt }}]
+            ['{{ status.Status }}', {{ status.CntNoSA }}, {{ status.CntSA }}]
           ]);
           total_orders += {{status.Cnt}};
         {% endfor %}
@@ -40,9 +41,14 @@
           chartArea: {
             backgroundColor: 'transparent'
           },
+          legend: { position: 'right' },
           bars: 'horizontal', // Required for Material Bar Charts.
-          colors: '#1b9e77',
-          legend: { position: 'none' },
+          isStacked: true,
+          //colors: '#1b9e77',
+          series: {
+            0:{color:'#1732c2'},
+            1:{color:'#1b9e77'},
+          }
         };
 
         barChart = new google.charts.Bar(document.getElementById('bar_chart_div'));
@@ -63,7 +69,8 @@
         var status = barData.getValue(selection[0].row, 0);
 
         $("#status_table_placeholder").load("/orders/status?status=" + status + '&date=' + today.toLocaleString().slice(0, 10).replace('/', '.').replace('/', '.').replace(',', ''));
-        $("#status_panel_heading").text("Orders for Status: " + status);      
+        $("#status_panel_heading").text("Orders for Status: " + status);
+        $('#status_export_button').show();      
       };
     </script>
   </head>

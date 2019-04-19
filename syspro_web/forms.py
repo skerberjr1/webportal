@@ -94,7 +94,7 @@ class OrderSearchForm(forms.Form):
     )
     salesperson = forms.MultipleChoiceField(
         label='Salesperson',
-        choices=(('3DU', '3DU'), ('AF', 'AF'), ('AZ', 'AZ'), ('PH', 'PH'), ('MGN', 'MGN'),),
+        choices=(('3DU', '3DU'), ('AF', 'AF'), ('AZ', 'AZ'), ('PH', 'PH'), ('MGN', 'MGN'), ('AP', 'AP')),
         initial=['3DU', 'AZ', 'PH', 'MGN'],
         widget=SelectMultipleButtonsWidget(),
         required=False,

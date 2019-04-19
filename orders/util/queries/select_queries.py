@@ -258,6 +258,8 @@ def select_search_orders(*args, **kwargs):
 
     if kwargs['order_type'] == 'ST':
         query += "AND SorMaster.OrderType IN ('ST', 'UF')\n"
+    elif kwargs['order_type'] == 'AP':
+        query += "AND SorMaster.OrderType = 'AP'\n"
     else:
         query += "AND SorMaster.OrderType = 'TR'\n"
 

@@ -25,18 +25,21 @@
         boxesData.addColumn('string', '');
         boxesData.addColumn('number', 'Transfer');
         boxesData.addColumn('number', 'Standard');
+        boxesData.addColumn('number', 'Amazon Prime');
 
         var total_boxes = 0;
         var standard_boxes = 0;
         var transfer_boxes = 0;
+        var amazon_boxes = 0;
 
         {% for hour in boxes %}
           boxesData.addRows([
-            ['{{ hour.ConfirmedHour }}', {{ hour.Transfer }}, {{ hour.Standard }}]
+            ['{{ hour.ConfirmedHour }}', {{ hour.Transfer }}, {{ hour.Standard }}, {{ hour.AmazonPrime }}]
           ]);
           total_boxes += {{hour.Cnt}};
           standard_boxes += {{hour.Standard}};
           transfer_boxes += {{hour.Transfer}};
+          amazon_boxes += {{hour.AmazonPrime}};
         {% endfor %}
 
         //Chart options
@@ -64,6 +67,7 @@
         $('#total_boxes').text(total_boxes);
         $('#standard_boxes').text(standard_boxes);
         $('#transfer_boxes').text(transfer_boxes);
+        $('#amazon_boxes').text(amazon_boxes);
       }
     </script>
   </head>

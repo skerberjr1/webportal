@@ -26,7 +26,7 @@ class OrderSearchForm(forms.Form):
     )
     order_type = forms.ChoiceField(
         label='Order Type',
-        choices=(('ST', 'Standard'), ('TR', 'Transfer')),
+        choices=(('ST', 'Standard'), ('TR', 'Transfer'), ('AP', 'Amazon Prime')),
         widget=forms.RadioSelect,
         initial='ST',
         required=True,

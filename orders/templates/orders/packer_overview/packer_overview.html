@@ -54,14 +54,16 @@
                 <select class="form-control" id="order_type">
                   <option value="ST">Standard</option>
                   <option value="TR">Transfer</option>
+                  <option value="AP">Amazon Prime</option>
                   <option value="all">All</option>
                 </select>
               </div>
-              <div class="col-sm-4 col-lg-3">
-                <label for="shipment_pack">Show packs or shipments</label>
+              <div class="col-sm-4 col-lg-4">
+                <label for="shipment_pack">Show packs, shipments, or weight</label>
                 <select class="form-control" id="shipment_pack">
                   <option value="pack">Packs</option>
                   <option value="shipment">Shipments</option>
+                  <option value="weight">Weight</option>
                 </select>
               </div>
               {% if request.user.is_staff %}

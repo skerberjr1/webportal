@@ -133,12 +133,14 @@
         $('#hour_chart').load('/orders/charts/hour_chart?begin_date=' + begin_date + '&end_date=' + end_date + '&interval=' + interval);
         $('#hour_table_placeholder').html('<div></div>');
         $('#hour_panel_heading').text('Select a column from above to show orders');
+        $('#hour_export_button').hide();
       };
 
       function loadStatusChart() {
         $('#status_chart').load('/orders/charts/status_chart');
         $('#status_table_placeholder').html('<div></div>');
         $('#status_panel_heading').text('Select a bar from above to show orders');
+        $('#status_export_button').hide();
       };
 
       loadHourChart();

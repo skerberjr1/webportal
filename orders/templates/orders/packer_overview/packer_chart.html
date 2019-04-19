@@ -29,7 +29,6 @@
           packerData.addColumn('number', '{{ p.0 }}');
         {% endfor %}
         packerData.addColumn({type: 'number', role: 'annotation'})
-
         {% for row in shipments %}
           packerData.addRows([
             [{% for value in row %}

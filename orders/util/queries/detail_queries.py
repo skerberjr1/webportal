@@ -107,6 +107,8 @@ def salesperson_interval_orders(begin_date, end_date, salesperson, group, item):
         sql_salesperson = 'AF'
     elif salesperson == 'AmazonFBM':
         sql_salesperson = 'AZ'
+    elif salesperson == 'AmazonPrime':
+        sql_salesperson = 'AP'
     elif salesperson == 'Magento':
         sql_salesperson = 'MGN'
     elif salesperson == 'Overstock':

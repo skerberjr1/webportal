@@ -154,7 +154,7 @@
         var status = barData.getValue(selection[0].row, 0);
 
         $("#status_table_placeholder").load("/orders/status/" + status + '/' + $('#overview_date').val().replace('/', '.').replace('/', '.'));
-        $("#status_panel_heading").text("Orders for Status: " + status);      
+        $("#status_panel_heading").text("Orders for Status: " + status);
       };
 
     </script>

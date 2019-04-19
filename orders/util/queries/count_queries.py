@@ -18,7 +18,9 @@ def order_count_status(date, order_type):
                     ELSE OrderStatus
                 END
             ) AS Status,
-            COUNT(SalesOrder) AS Cnt
+            COUNT(SalesOrder) AS Cnt,
+            SUM(CASE WHEN OrderType <> 'SA' THEN 1 ELSE 0 END) AS CntNoSA,
+            SUM(CASE WHEN OrderType = 'SA' THEN 1 ELSE 0 END) AS CntSA
         FROM SorMaster
         WHERE (
             NOT (OrderStatus IN ('9', '\\', '*', 'F'))
@@ -29,7 +31,7 @@ def order_count_status(date, order_type):
     """ % (date, date))
 
     if order_type == 'ST':
-        query += "AND OrderType IN ('ST', 'UF') "
+        query += "AND OrderType IN ('ST', 'UF', 'AP', 'SA') "
     elif order_type == 'TR':
         query += "AND OrderType = 'TR' "
 
@@ -78,62 +80,80 @@ def order_count_hour(begin_date, end_date, interval, **kwargs):
         query += "AS CaptureTime, CONVERT(varchar, CONVERT(date, OrderDate), 101) AS OrderDate, "
 
     elif interval == 'day':
-        query += "SELECT CONVERT(varchar, CONVERT(date, OrderDate), 101) AS CaptureTime, "
+        query += "SELECT CONVERT(varchar, CONVERT(date, DateTimeCompleted), 101) AS CaptureTime, "
     elif interval == 'week':
-        query += "SELECT CONVERT(varchar, CONVERT(date, MIN(OrderDate)), 101) AS CaptureTime, "
+        query += "SELECT CONVERT(varchar, CONVERT(date, MIN(DateTimeCompleted)), 101) AS CaptureTime, "
     elif interval == 'month':
-        query += "SELECT CONVERT(varchar, DATEPART(mm, OrderDate)) + '/' + CONVERT(varchar, DATEPART(yyyy, OrderDate)) AS CaptureTime, "
+        query += "SELECT CONVERT(varchar, DATEPART(mm, DateTimeCompleted)) + '/' + CONVERT(varchar, DATEPART(yyyy, DateTimeCompleted)) AS CaptureTime, "
     elif interval == 'year':
-        query += "SELECT DATEPART(year, OrderDate) AS CaptureTime, "
+        query += "SELECT DATEPART(year, DateTimeCompleted) AS CaptureTime, "
 
     if 'unit_display' in kwargs:
         if kwargs['unit_display'] == 'qty_sold':
             query += """
                 SUM(D.MOrderQty * ISNULL(B.QtyPer, 1)) AS Cnt,
-                SUM(CASE WHEN Salesperson = 'AZ' THEN D.MOrderQty * ISNULL(B.QtyPer, 1) END) AS AZ,
-                SUM(CASE WHEN (Salesperson = 'MGN' AND CustomerPoNumber LIKE 'M%%') OR Salesperson = '3DN' THEN D.MOrderQty * ISNULL(B.QtyPer, 1) END) AS MGN,
-                SUM(CASE WHEN Salesperson = 'OS' THEN D.MOrderQty * ISNULL(B.QtyPer, 1) END) AS OS,
-                SUM(CASE WHEN Salesperson = 'PH' AND OrderType <> 'UF' THEN D.MOrderQty * ISNULL(B.QtyPer, 1) END) AS PH,
-                SUM(CASE WHEN (Salesperson = 'PH' AND OrderType = 'UF') OR (Salesperson = 'MGN' AND CustomerPoNumber LIKE 'A%%') THEN D.MOrderQty * ISNULL(B.QtyPer, 1) END) AS UF,
-                SUM(CASE WHEN Salesperson = 'WH' THEN D.MOrderQty * ISNULL(B.QtyPer, 1) END) AS WH 
+                SUM(CASE WHEN M.Salesperson = 'AP' THEN D.MOrderQty * ISNULL(B.QtyPer, 1) END) AS AP,
+                SUM(CASE WHEN M.Salesperson = 'AZ' THEN D.MOrderQty * ISNULL(B.QtyPer, 1) END) AS AZ,
+                SUM(CASE WHEN (M.Salesperson = 'MGN' AND M.CustomerPoNumber LIKE 'M%%') OR M.Salesperson = '3DN' THEN D.MOrderQty * ISNULL(B.QtyPer, 1) END) AS MGN,
+                SUM(CASE WHEN M.Salesperson = 'OS' THEN D.MOrderQty * ISNULL(B.QtyPer, 1) END) AS OS,
+                SUM(CASE WHEN M.Salesperson = 'PH' AND M.OrderType NOT IN ('UF', 'SA') THEN D.MOrderQty * ISNULL(B.QtyPer, 1) END) AS PH,
+                SUM(CASE WHEN (M.Salesperson = 'PH' AND M.OrderType = 'UF') OR (M.Salesperson = 'MGN' AND M.CustomerPoNumber LIKE 'A%%') THEN D.MOrderQty * ISNULL(B.QtyPer, 1) END) AS UF,
+                SUM(CASE WHEN M.Salesperson = 'WH' THEN D.MOrderQty * ISNULL(B.QtyPer, 1) END) AS WH,
+                SUM(CASE WHEN M.Salesperson = 'PH' AND M.OrderType = 'SA' THEN D.MOrderQty * ISNULL(B.QtyPer, 1) END) AS SA
             """
             if 'item_sales' in kwargs:
-                query += ", SUM(CASE WHEN Salesperson = 'AF' THEN D.MOrderQty * ISNULL(B.QtyPer, 1) END) AS AF "
+                query += ", SUM(CASE WHEN M.Salesperson = 'AF' THEN D.MOrderQty * ISNULL(B.QtyPer, 1) END) AS AF "
 
         elif kwargs['unit_display'] == 'num_orders':
             query += """
                 COUNT(DISTINCT M.SalesOrder) AS Cnt,
-                COUNT(DISTINCT CASE WHEN Salesperson = 'AZ' THEN M.SalesOrder END) AS AZ,
-                COUNT(DISTINCT CASE WHEN (Salesperson = 'MGN' AND CustomerPoNumber LIKE 'M%%') OR Salesperson = '3DN' THEN M.SalesOrder END) AS MGN,
-                COUNT(DISTINCT CASE WHEN Salesperson = 'OS' THEN M.SalesOrder END) AS OS,
-                COUNT(DISTINCT CASE WHEN Salesperson = 'PH' AND OrderType <> 'UF' THEN M.SalesOrder END) AS PH,
-                COUNT(DISTINCT CASE WHEN (Salesperson = 'PH' AND OrderType = 'UF') OR (Salesperson = 'MGN' AND CustomerPoNumber LIKE 'A%%') THEN M.SalesOrder END) AS UF,
-                COUNT(DISTINCT CASE WHEN Salesperson = 'WH' THEN M.SalesOrder END) AS WH 
+                COUNT(DISTINCT CASE WHEN M.Salesperson = 'AP' THEN M.SalesOrder END) AS AP,
+                COUNT(DISTINCT CASE WHEN M.Salesperson = 'AZ' THEN M.SalesOrder END) AS AZ,
+                COUNT(DISTINCT CASE WHEN (M.Salesperson = 'MGN' AND M.CustomerPoNumber LIKE 'M%%') OR M.Salesperson = '3DN' THEN M.SalesOrder END) AS MGN,
+                COUNT(DISTINCT CASE WHEN M.Salesperson = 'OS' THEN M.SalesOrder END) AS OS,
+                COUNT(DISTINCT CASE WHEN M.Salesperson = 'PH' AND M.OrderType NOT IN ('UF', 'SA') THEN M.SalesOrder END) AS PH,
+                COUNT(DISTINCT CASE WHEN (M.Salesperson = 'PH' AND M.OrderType = 'UF') OR (M.Salesperson = 'MGN' AND M.CustomerPoNumber LIKE 'A%%') THEN M.SalesOrder END) AS UF,
+                COUNT(DISTINCT CASE WHEN M.Salesperson = 'WH' THEN M.SalesOrder END) AS WH,
+                COUNT(DISTINCT CASE WHEN M.Salesperson = 'PH' AND M.OrderType = 'SA' THEN M.SalesOrder END) AS SA
             """
             if 'item_sales' in kwargs:
-                query += ", COUNT(DISTINCT CASE WHEN Salesperson = 'AF' THEN M.SalesOrder END) AS AF "
+                query += ", COUNT(DISTINCT CASE WHEN M.Salesperson = 'AF' THEN M.SalesOrder END) AS AF "
 
         elif kwargs['unit_display'] == 'sales_value':
+            # query += """
+            #     SUM(D.MOrderQty * D.MPrice) AS Cnt,
+            #     SUM(CASE WHEN M.Salesperson = 'AP' THEN D.MOrderQty * D.MPrice END) AS AP,
+            #     SUM(CASE WHEN M.Salesperson = 'AZ' THEN D.MOrderQty * D.MPrice END) AS AZ,
+            #     SUM(CASE WHEN (M.Salesperson = 'MGN' AND M.CustomerPoNumber LIKE 'M%%') OR M.Salesperson = '3DN' THEN D.MOrderQty * D.MPrice END) AS MGN,
+            #     SUM(CASE WHEN M.Salesperson = 'OS' THEN D.MOrderQty * D.MPrice END) AS OS,
+            #     SUM(CASE WHEN M.Salesperson = 'PH' AND M.OrderType NOT IN ('UF', 'SA') THEN D.MOrderQty * D.MPrice END) AS PH,
+            #     SUM(CASE WHEN (M.Salesperson = 'PH' AND M.OrderType = 'UF') OR (M.Salesperson = 'MGN' AND M.CustomerPoNumber LIKE 'A%%') THEN D.MOrderQty * D.MPrice END) AS UF,
+            #     SUM(CASE WHEN M.Salesperson = 'WH' THEN D.MOrderQty * D.MPrice END) AS WH,
+            #     SUM(CASE WHEN M.Salesperson = 'PH' AND M.OrderType = SA' THEN D.MOrderQty * D.MPrice END) AS SA
+            # """
             query += """
                 SUM(D.MOrderQty * D.MPrice) AS Cnt,
-                SUM(CASE WHEN Salesperson = 'AZ' THEN D.MOrderQty * D.MPrice END) AS AZ,
-                SUM(CASE WHEN (Salesperson = 'MGN' AND CustomerPoNumber LIKE 'M%%') OR Salesperson = '3DN' THEN D.MOrderQty * D.MPrice END) AS MGN,
-                SUM(CASE WHEN Salesperson = 'OS' THEN D.MOrderQty * D.MPrice END) AS OS,
-                SUM(CASE WHEN Salesperson = 'PH' AND OrderType <> 'UF' THEN D.MOrderQty * D.MPrice END) AS PH,
-                SUM(CASE WHEN (Salesperson = 'PH' AND OrderType = 'UF') OR (Salesperson = 'MGN' AND CustomerPoNumber LIKE 'A%%') THEN D.MOrderQty * D.MPrice END) AS UF,
-                SUM(CASE WHEN Salesperson = 'WH' THEN D.MOrderQty * D.MPrice END) AS WH 
+                SUM(CASE WHEN M.Salesperson = 'AP' THEN D.MOrderQty * D.MPrice END) AS AP,
+                SUM(CASE WHEN M.Salesperson = 'AZ' THEN D.MOrderQty * D.MPrice END) AS AZ,
+                SUM(CASE WHEN (M.Salesperson = 'MGN' AND M.CustomerPoNumber LIKE 'M%%') OR M.Salesperson = '3DN' THEN D.MOrderQty * D.MPrice END) AS MGN,
+                SUM(CASE WHEN M.Salesperson = 'OS' THEN D.MOrderQty * D.MPrice END) AS OS,
+                SUM(CASE WHEN M.Salesperson = 'PH' AND M.OrderType NOT IN ('UF', 'SA') THEN D.MOrderQty * D.MPrice END) AS PH,
+                SUM(CASE WHEN (M.Salesperson = 'PH' AND M.OrderType = 'UF') OR (M.Salesperson = 'MGN' AND M.CustomerPoNumber LIKE 'A%%') THEN D.MOrderQty * D.MPrice END) AS UF,
+                SUM(CASE WHEN M.Salesperson = 'WH' THEN D.MOrderQty * D.MPrice END) AS WH
             """
             if 'item_sales' in kwargs:
-                query += ", SUM(CASE WHEN Salesperson = 'AF' THEN D.MOrderQty * D.MPrice END) AS AF "
+                query += ", SUM(CASE WHEN M.Salesperson = 'AF' THEN D.MOrderQty * D.MPrice END) AS AF "
     else:
         query += """
                 COUNT(DISTINCT M.SalesOrder) AS Cnt,
-                COUNT(DISTINCT CASE WHEN Salesperson = 'AZ' THEN M.SalesOrder END) AS AZ,
-                COUNT(DISTINCT CASE WHEN (Salesperson = 'MGN' AND CustomerPoNumber LIKE 'M%%') OR Salesperson = '3DN' THEN M.SalesOrder END) AS MGN,
-                COUNT(DISTINCT CASE WHEN Salesperson = 'OS' THEN M.SalesOrder END) AS OS,
-                COUNT(DISTINCT CASE WHEN Salesperson = 'PH' AND OrderType <> 'UF' THEN M.SalesOrder END) AS PH,
-                COUNT(DISTINCT CASE WHEN (Salesperson = 'PH' AND OrderType = 'UF') OR (Salesperson = 'MGN' AND CustomerPoNumber LIKE 'A%%') THEN M.SalesOrder END) AS UF,
-                COUNT(DISTINCT CASE WHEN Salesperson = 'WH' THEN M.SalesOrder END) AS WH 
+                COUNT(DISTINCT CASE WHEN M.Salesperson = 'AP' THEN M.SalesOrder END) AS AP,
+                COUNT(DISTINCT CASE WHEN M.Salesperson = 'AZ' THEN M.SalesOrder END) AS AZ,
+                COUNT(DISTINCT CASE WHEN (M.Salesperson = 'MGN' AND M.CustomerPoNumber LIKE 'M%%') OR M.Salesperson = '3DN' THEN M.SalesOrder END) AS MGN,
+                COUNT(DISTINCT CASE WHEN M.Salesperson = 'OS' THEN M.SalesOrder END) AS OS,
+                COUNT(DISTINCT CASE WHEN M.Salesperson = 'PH' AND M.OrderType NOT IN ('UF', 'SA') THEN M.SalesOrder END) AS PH,
+                COUNT(DISTINCT CASE WHEN (M.Salesperson = 'PH' AND M.OrderType = 'UF') OR (M.Salesperson = 'MGN' AND M.CustomerPoNumber LIKE 'A%%') THEN M.SalesOrder END) AS UF,
+                COUNT(DISTINCT CASE WHEN M.Salesperson = 'WH' THEN M.SalesOrder END) AS WH,
+                COUNT(DISTINCT CASE WHEN M.Salesperson = 'PH' AND M.OrderType = 'SA' THEN M.SalesOrder END) AS SA 
         """
 
     if interval == 'hour':
@@ -147,12 +167,12 @@ def order_count_hour(begin_date, end_date, interval, **kwargs):
         (
             (
                 OrderDate = '%s'
-                AND CONVERT(time, DATEADD(hour, CaptureHh, DATEADD(minute, CaptureMm, 0)), 108) < '17:13'
+                AND CONVERT(time, DATEADD(hour, CaptureHh, DATEADD(minute, CaptureMm, 0)), 108) < '19:17'
             )
             OR
             (
                 OrderDate = CONVERT(date, dateadd(d, -1, '%s'),10)
-                AND CONVERT(time, DATEADD(hour, CaptureHh, DATEADD(minute, CaptureMm, 0)), 108) >= '17:13'
+                AND CONVERT(time, DATEADD(hour, CaptureHh, DATEADD(minute, CaptureMm, 0)), 108) >= '19:17'
             ) 
         """ % (end_date, begin_date))
         if begin_date != end_date:
@@ -168,19 +188,26 @@ def order_count_hour(begin_date, end_date, interval, **kwargs):
 
     else:
         query += ("""
-        FROM SorMasterRep AS M
-        JOIN SorDetailRep AS D ON M.SalesOrder = D.SalesOrder AND M.InvoiceNumber = D.Invoice
-        JOIN InvMaster AS I ON D.StockCode = I.StockCode
+        FROM SorMaster AS M
+        JOIN SorDetail AS D ON M.SalesOrder = D.SalesOrder
+        JOIN InvMaster AS I ON D.MStockCode = I.StockCode
         JOIN [InvMaster+] AS IP ON I.StockCode = IP.StockCode
-        LEFT JOIN BomStructure AS B ON D.StockCode = B.ParentPart
-        WHERE CONVERT(date, OrderDate) BETWEEN '%s' AND '%s' 
+        JOIN NorthShoreShipmentMaster AS SM ON M.SalesOrder = SM.SalesOrder AND D.SalesOrder = SM.SalesOrder
+        LEFT JOIN BomStructure AS B ON D.MStockCode = B.ParentPart
+        WHERE CONVERT(date, DateTimeCompleted) BETWEEN '%s' AND '%s' 
         """ % (begin_date, end_date))
 
     query += """
-        AND NOT (Salesperson IN ('AF', 'MM'))
-        AND OrderType <> 'TR'
+        AND NOT (M.Salesperson IN ('AF', 'MM'))
+        AND M.OrderType <> 'TR'
         AND NOT (DocumentType IN ('B', 'C')) 
     """
+
+    if interval != 'hour':
+        query += """
+        AND M.OrderStatus in ('8', '9') 
+        AND RTRIM(ISNULL(DateTimeCompleted, '')) <> ''
+        """
 
     if 'group' in kwargs and 'item' in kwargs and kwargs['item'] != 'all':
         item = kwargs['item']
@@ -210,18 +237,13 @@ def order_count_hour(begin_date, end_date, interval, **kwargs):
     if interval == 'hour':
         query += "GROUP BY CaptureHh, OrderDate ORDER BY OrderDate, CaptureHh"
     elif interval == 'day':
-        query += "GROUP BY OrderDate ORDER BY OrderDate"
+        query += "GROUP BY CONVERT(varchar, CONVERT(date, DateTimeCompleted), 101) ORDER BY CONVERT(varchar, CONVERT(date, DateTimeCompleted), 101)"
     elif interval == 'week':
-        query += "GROUP BY DATEPART(ww, OrderDate) ORDER BY CONVERT(date, MIN(OrderDate), 10)"
+        query += "GROUP BY DATEPART(ww, DateTimeCompleted) ORDER BY CONVERT(date, MIN(DateTimeCompleted), 10)"
     elif interval == 'month':
-        query += "GROUP BY DATEPART(mm, OrderDate), DATEPART(yyyy, OrderDate) ORDER BY DATEPART(yyyy, OrderDate), DATEPART(mm, OrderDate)"
+        query += "GROUP BY DATEPART(mm, DateTimeCompleted), DATEPART(yyyy, DateTimeCompleted) ORDER BY DATEPART(yyyy, DateTimeCompleted), DATEPART(mm, DateTimeCompleted)"
     elif interval == 'year':
-        query += "GROUP BY DATEPART(year, OrderDate) ORDER BY DATEPART(year, OrderDate)"
-
-    if interval != 'hour':
-        query = query.replace('D.MOrderQty', 'D.OrderQty')
-        query = query.replace('D.MPrice', 'D.Price')
-        query = query.replace('D.MStockCode', 'D.StockCode')
+        query += "GROUP BY DATEPART(year, DateTimeCompleted) ORDER BY DATEPART(year, DateTimeCompleted)"
 
     if 'item_sales' in kwargs:
         query = query.replace("AND NOT (Salesperson IN ('AF', 'MM'))", "AND NOT (Salesperson IN ('MM'))")
@@ -326,7 +348,8 @@ def box_count_hour(date):
             ) AS ConfirmedHour,
             COUNT(LicensePlateNumber) AS Cnt,
             COUNT(CASE WHEN OrderType = 'TR' THEN LicensePlateNumber END) AS Transfer,
-            COUNT(CASE WHEN OrderType IN ('UF', 'ST') THEN LicensePlateNumber END) AS Standard
+            COUNT(CASE WHEN OrderType IN ('UF', 'ST') THEN LicensePlateNumber END) AS Standard,
+            COUNT(CASE WHEN OrderType = 'AP' THEN LicensePlateNumber END) AS AmazonPrime
         FROM NorthShoreShipmentPack
         WHERE CONVERT(DATE, RdsTimeConfirmed) = %s
         GROUP BY DATEPART(HOUR, RdsTimeConfirmed)
@@ -371,11 +394,15 @@ def shipment_count_packer(begin_date, end_date, interval, order_type, packer, sh
             query += "COUNT(DISTINCT CASE WHEN NorthShoreShipmentMaster.User1 LIKE '%s' THEN NorthShoreShipmentMaster.ShipmentNumber END) AS [%s], " % (p[0].replace('-', '%').replace('_', ' '), p[0].replace('-', ''))
         elif shipment_pack == 'pack':
             query += "COUNT(DISTINCT CASE WHEN NorthShoreShipmentMaster.User1 LIKE '%s' THEN LicensePlateNumber END) AS [%s], " % (p[0].replace('-', '%').replace('_', ' '), p[0].replace('-', ''))
+        elif shipment_pack == 'weight':
+            query += "ISNULL(SUM(CASE WHEN NorthShoreShipmentMaster.User1 LIKE '%s' THEN NorthShoreShipmentPack.Weight END),0) AS [%s], " % (p[0].replace('-', '%').replace('_', ' '), p[0].replace('-', ''))
 
     if shipment_pack == 'shipment':
         query += "COUNT(DISTINCT NorthShoreShipmentMaster.ShipmentNumber) AS Total "
     elif shipment_pack == 'pack':
         query += "COUNT(DISTINCT NorthShoreShipmentPack.LicensePlateNumber) AS Total "
+    elif shipment_pack == 'weight':
+        query += "ISNULL(Sum(NorthShoreShipmentPack.Weight),0) AS Total "
 
     query += ("""
         FROM NorthShoreShipmentMaster
@@ -387,6 +414,8 @@ def shipment_count_packer(begin_date, end_date, interval, order_type, packer, sh
         query += "AND NorthShoreShipmentMaster.OrderType IN ('UF', 'ST')"
     elif order_type == 'TR':
         query += "AND NorthShoreShipmentMaster.OrderType = 'TR'"
+    elif order_type == 'AP':
+        query += "AND NorthShoreShipmentMaster.OrderType = 'AP'"
 
     if interval == 'hour':
         query += "GROUP BY DATEPART(HOUR, DateTimeCompleted), CONVERT(date, DateTimeCompleted) ORDER BY CONVERT(date, DateTimeCompleted), DATEPART(HOUR, DateTimeCompleted) "
@@ -441,9 +470,9 @@ def top_skus(begin_date, end_date, group, unit_sum, channel):
     """ % (begin_date, end_date))
 
     if channel == 'northshore':
-        query += "AND NOT Salesperson IN ('AZ', 'AF', 'OS') "
+        query += "AND NOT Salesperson IN ('AZ', 'AF', 'OS', 'AP') "
     elif channel == 'amazon':
-        query += "AND Salesperson IN ('AZ', 'AF') "
+        query += "AND Salesperson IN ('AZ', 'AF', 'AP') "
     elif channel == 'overstock':
         query += "AND Salesperson = 'OS'"
 
